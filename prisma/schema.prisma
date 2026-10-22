@@ -1,0 +1,167 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Branch {
+  id               String      @id @default(uuid())
+  code             String      @unique
+  name             String
+  shortName        String
+  associationName  String
+  associationShort String
+  iconName         String      @default("Code")
+  facultyAdvisor   String
+  studentPresident String
+  contactEmail     String
+  contactPhone     String
+  accentColor      String
+  bgLightColor     String
+  description      String      @db.Text
+  workshops        Workshop[]
+  events           Event[]
+  organizers       Organizer[]
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+}
+
+model Organizer {
+  id           String   @id @default(uuid())
+  branchCode   String
+  branch       Branch   @relation(fields: [branchCode], references: [code], onDelete: Cascade)
+  username     String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("BRANCH_ADMIN")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([branchCode, username])
+}
+
+model Workshop {
+  id                         String   @id @default(uuid())
+  slug                       String   @unique
+  branchCode                 String
+  branch                     Branch   @relation(fields: [branchCode], references: [code], onDelete: Cascade)
+  title                      String
+  tagline                    String
+  description                String?  @db.Text
+  posterUrl                  String
+  yearLeadName               String
+  yearLeadYear               String   @default("4th Year B.Tech")
+  yearLeadPhone              String
+  yearLeadEmail              String
+  yearLeadAvatar             String
+  resourcePersonName         String
+  resourcePersonDesignation  String
+  resourcePersonCompany      String
+  resourcePersonBio          String   @db.Text
+  resourcePersonAvatar       String
+  resourcePersonLinkedin     String?
+  resourcePersonTopics       String[]
+  dates                      String
+  time                       String
+  venue                      String
+  fees                       String
+  maxCapacity                Int      @default(200)
+  currentRegistered          Int      @default(0)
+  liveStatus                 String   @default("upcoming")
+  prerequisites              String[]
+  takeaways                  String[]
+  syllabus                   Json     @default("[]")
+  registrationUrl            String
+  googleFormUrl              String?
+  reportPdfUrl               String?
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  @@index([branchCode, slug])
+}
+
+model Event {
+  id                 String   @id @default(uuid())
+  slug               String   @unique
+  branchCode         String
+  branch             Branch   @relation(fields: [branchCode], references: [code], onDelete: Cascade)
+  title              String
+  category           String
+  tagline            String
+  description        String?  @db.Text
+  posterUrl          String
+  juniorCoordinators Json     @default("[]")
+  venue              String
+  day                String
+  time               String
+  prizePoolFirst     String
+  prizePoolSecond    String
+  prizePoolThird     String?
+  prizePoolTotal     String
+  teamSize           String
+  currentRegistered  Int      @default(0)
+  maxSlots           Int      @default(100)
+  status             String   @default("upcoming")
+  rules              String[]
+  rounds             Json     @default("[]")
+  registrationUrl    String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([branchCode, category, day])
+}
+
+model ScheduleItem {
+  id            String   @id @default(uuid())
+  time          String
+  title         String
+  type          String
+  branchCode    String?
+  venue         String
+  day           String
+  speakerOrLead String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([day, type])
+}
+
+model LegacyEdition {
+  year                Int      @id
+  theme               String
+  dates               String
+  totalAttendees      Int
+  totalEvents         Int
+  totalWorkshops      Int
+  prizeMoneyDisbursed String
+  highlights          String[]
+  souvenirPdfUrl      String
+  coverImage          String
+  galleryPreview      String[]
+  chiefGuestName      String
+  chiefGuestTitle     String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Registration {
+  id            String   @id @default(uuid())
+  passToken     String   @unique
+  fullName      String
+  college       String
+  rollNumber    String
+  branch        String
+  yearOfStudy   String
+  email         String
+  phone         String
+  teamName      String?
+  targetTitle   String
+  targetType    String   // 'workshop' | 'event'
+  paymentStatus String   @default("VERIFIED")
+  createdAt     DateTime @default(now())
+
+  @@index([passToken, email, rollNumber])
+}

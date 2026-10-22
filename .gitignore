@@ -1,0 +1,55 @@
+# ==========================================
+# Next.js Dependencies
+# ==========================================
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ==========================================
+# Next.js Production Builds & Output Cache
+# ==========================================
+/.next/
+/out/
+/build/
+/dist/
+.next/cache/
+*.tsbuildinfo
+
+# ==========================================
+# Environment Variables & Secrets
+# ==========================================
+.env
+.env*.local
+.env.production
+.env.development
+*.pem
+
+# ==========================================
+# Logs & Debugging
+# ==========================================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# ==========================================
+# Operating System Files
+# ==========================================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# ==========================================
+# IDE Configuration
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==========================================
+# Local Uploads Fallback (Media is strictly in Git)
+# ==========================================
+/public/uploads/
