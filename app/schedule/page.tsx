@@ -45,7 +45,7 @@ export default function SchedulePage() {
             <span>Official 2-Day Technical Fest Itinerary</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-slate-950 tracking-tight">
+          <h1 className="text-2xl sm:text-5xl font-black text-slate-950 tracking-tight">
             Schedule & Department Venues
           </h1>
 
@@ -55,14 +55,14 @@ export default function SchedulePage() {
 
           {/* Edition Switcher Pill */}
           {editions.length > 1 && (
-            <div className="pt-2 flex items-center justify-center gap-2">
+            <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
               <span className="text-xs text-slate-500 font-semibold">Academic Edition:</span>
-              <div className="inline-flex p-1 bg-white rounded-xl border border-slate-200">
+              <div className="inline-flex p-1 bg-white rounded-xl border border-slate-200 overflow-x-auto scrollbar-none max-w-full">
                 {editions.map((ed) => (
                   <button
                     key={ed.year}
                     onClick={() => setSelectedYear(ed.year)}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
                       ed.year === selectedYear 
                         ? 'bg-slate-900 text-white shadow-xs' 
                         : 'text-slate-600 hover:text-slate-900'
@@ -76,7 +76,7 @@ export default function SchedulePage() {
           )}
         </div>
 
-        <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
+        <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 p-4 sm:p-8 shadow-xs">
           <ScheduleTimeline editionYear={selectedYear} />
         </div>
       </main>

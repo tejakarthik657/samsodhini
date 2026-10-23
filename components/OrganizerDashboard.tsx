@@ -27,7 +27,8 @@ import {
   ChevronUp,
   X,
   Camera,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Award
 } from 'lucide-react';
 import { Workshop, FestEvent, Edition, GalleryItem } from '../types';
 
@@ -60,7 +61,7 @@ export default function OrganizerDashboard() {
   const [selectedBranch, setSelectedBranch] = useState('CSE');
   const [username, setUsername] = useState('ace_cse');
   const [password, setPassword] = useState('samshodhani26');
-  const [activeTab, setActiveTab] = useState<'workshop' | 'events' | 'gallery' | 'archive' | 'roster'>('workshop');
+  const [activeTab, setActiveTab] = useState<'workshop' | 'events' | 'gallery' | 'studentBody' | 'archive' | 'roster'>('workshop');
 
   // Real data from DB
   const [editions, setEditions] = useState<Edition[]>([]);
@@ -72,6 +73,25 @@ export default function OrganizerDashboard() {
   const [newEditionDates, setNewEditionDates] = useState('October 22–23, 2027');
   const [newEditionSetActive, setNewEditionSetActive] = useState(false);
   const [creatingEdition, setCreatingEdition] = useState(false);
+
+  // Edit Edition Dates & Settings modal state
+  const [showEditEditionModal, setShowEditEditionModal] = useState<boolean>(false);
+  const [editEditionDates, setEditEditionDates] = useState<string>('October 30–31, 2026');
+  const [editEditionTheme, setEditEditionTheme] = useState<string>('National Science & Technology Symposium');
+  const [editEditionName, setEditEditionName] = useState<string>("Sumshodhini '26");
+  const [updatingEdition, setUpdatingEdition] = useState<boolean>(false);
+
+  // Branch Logo & Student Body Executive Poster state
+  const [branchLogoUrl, setBranchLogoUrl] = useState<string>('');
+  const [branchStudentBodyPoster, setBranchStudentBodyPoster] = useState<string>('');
+  const [branchStudentBodyTitle, setBranchStudentBodyTitle] = useState<string>('');
+  const [branchStudentBodyDesc, setBranchStudentBodyDesc] = useState<string>('');
+  const [branchFacultyAdvisor, setBranchFacultyAdvisor] = useState<string>('');
+  const [branchStudentPresident, setBranchStudentPresident] = useState<string>('');
+  const [uploadingLogo, setUploadingLogo] = useState<boolean>(false);
+  const [uploadingStudentBody, setUploadingStudentBody] = useState<boolean>(false);
+  const [savingStudentBody, setSavingStudentBody] = useState<boolean>(false);
+  const [uploadingSpeakerImage, setUploadingSpeakerImage] = useState<boolean>(false);
 
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [events, setEvents] = useState<FestEvent[]>([]);
@@ -151,31 +171,60 @@ export default function OrganizerDashboard() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Fetch workshops, events, registrations, editions, and gallery from API
+  // Fetch workshops, events, registrations, editions, gallery, and student body from API
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [wsRes, evRes, regRes, edRes, galRes] = await Promise.all([
+      const [wsRes, evRes, regRes, edRes, galRes, brRes, sbRes] = await Promise.all([
         fetch(`/api/workshops?branch=${selectedBranch}&year=${targetEditionYear}`),
         fetch(`/api/events?branch=${selectedBranch}&year=${targetEditionYear}`),
         fetch(`/api/register?branch=${selectedBranch}`),
         fetch('/api/editions'),
         fetch(`/api/gallery?branch=${selectedBranch}&year=${targetEditionYear}`),
+        fetch('/api/branches'),
+        fetch(`/api/student-body?branch=${selectedBranch}&year=${targetEditionYear}`),
       ]);
       const wsData = await wsRes.json();
       const evData = await evRes.json();
       const regData = await regRes.json();
       const edData = await edRes.json();
       const galData = await galRes.json();
+      const brData = await brRes.json();
+      const sbData = await sbRes.json();
 
       if (wsData.success) setWorkshops(wsData.data || []);
       if (evData.success) setEvents(evData.data || []);
       if (regData.success) setRegistrations(regData.data || []);
       if (edData.success && edData.data) {
         setEditions(edData.data);
+        const currentEd = edData.data.find((e: any) => e.year === targetEditionYear) || edData.data[0];
+        if (currentEd) {
+          setEditEditionDates(currentEd.dates || 'October 30–31, 2026');
+          setEditEditionTheme(currentEd.theme || 'National Science & Technology Symposium');
+          setEditEditionName(currentEd.name || `Sumshodhini '${String(targetEditionYear).slice(-2)}`);
+        }
       }
       if (galData.success) {
         setGalleryPhotos(galData.data || []);
+      }
+      if (brData.success && Array.isArray(brData.data)) {
+        const thisBranch = brData.data.find((b: any) => b.code?.toUpperCase() === selectedBranch.toUpperCase());
+        if (thisBranch) {
+          setBranchLogoUrl(thisBranch.logoUrl || '');
+          setBranchStudentBodyPoster(thisBranch.studentBodyPosterUrl || '');
+          setBranchStudentBodyTitle(thisBranch.studentBodyTitle || `${selectedBranch} Executive Student Body`);
+          setBranchStudentBodyDesc(thisBranch.studentBodyDescription || '');
+          setBranchFacultyAdvisor(thisBranch.facultyAdvisor || '');
+          setBranchStudentPresident(thisBranch.studentPresident || '');
+        }
+      }
+      if (sbData.success && Array.isArray(sbData.data) && sbData.data.length > 0) {
+        const sbItem = sbData.data[0];
+        if (sbItem.posterUrl) setBranchStudentBodyPoster(sbItem.posterUrl);
+        if (sbItem.title) setBranchStudentBodyTitle(sbItem.title);
+        if (sbItem.description) setBranchStudentBodyDesc(sbItem.description);
+        if (sbItem.facultyAdvisor) setBranchFacultyAdvisor(sbItem.facultyAdvisor);
+        if (sbItem.studentPresident) setBranchStudentPresident(sbItem.studentPresident);
       }
     } catch (err) {
       console.error('Error fetching data:', err);
@@ -243,10 +292,10 @@ export default function OrganizerDashboard() {
       setWsSpeakerLinkedin(currentWs.resourcePerson?.linkedin || '');
       setWsSpeakerAvatar(currentWs.resourcePerson?.avatar || '');
       setWsSpeakerTopics(Array.isArray(currentWs.resourcePerson?.topics) ? currentWs.resourcePerson.topics.join(', ') : '');
-      setWsLeadConvenerName(currentWs.leadCoordinator?.name || currentWs.yearLead?.name || '');
-      setWsLeadConvenerRole(currentWs.leadCoordinator?.role || currentWs.yearLead?.role || 'Lead Student Convener');
-      setWsLeadConvenerPhone(currentWs.leadCoordinator?.phone || currentWs.yearLead?.phone || '');
-      setWsLeadConvenerEmail(currentWs.leadCoordinator?.email || currentWs.yearLead?.email || '');
+      setWsLeadConvenerName(currentWs.leadCoordinator?.name || (currentWs as any).yearLead?.name || '');
+      setWsLeadConvenerRole(currentWs.leadCoordinator?.role || (currentWs as any).yearLead?.role || 'Lead Student Convener');
+      setWsLeadConvenerPhone(currentWs.leadCoordinator?.phone || (currentWs as any).yearLead?.phone || '');
+      setWsLeadConvenerEmail(currentWs.leadCoordinator?.email || (currentWs as any).yearLead?.email || '');
       setWsDates(currentWs.dates || 'Day 1 & Day 2');
       setWsTime(currentWs.time || '09:30 AM - 04:30 PM');
       setWsVenue(currentWs.venue || 'Campus Central Laboratory');
@@ -802,16 +851,14 @@ export default function OrganizerDashboard() {
   };
 
   // DELETE GALLERY PHOTO
-  const handleDeleteGalleryPhoto = async (photoId: number, title: string) => {
-    if (!confirm(`Are you sure you want to remove this photo from the symposium gallery?`)) {
-      return;
-    }
+  const handleDeleteGalleryPhoto = async (id: number, itemTitle: string) => {
+    if (!confirm(`Are you sure you want to remove this photo for "${itemTitle}"?`)) return;
     try {
-      const res = await fetch(`/api/gallery?id=${photoId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/gallery?id=${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        setGalleryPhotos((prev) => prev.filter((p) => p.id !== photoId));
         showToast('Photo removed from symposium gallery');
+        fetchData();
       } else {
         showToast(data.error || 'Failed to remove photo');
       }
@@ -819,6 +866,184 @@ export default function OrganizerDashboard() {
       showToast('Error removing gallery photo');
     }
   };
+
+  // UPLOAD & UPDATE BRANCH ASSOCIATION LOGO
+  const handleUploadBranchLogo = async (file: File | undefined) => {
+    if (!file) return;
+    setUploadingLogo(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'logo');
+      formData.append('branch', selectedBranch);
+
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const uploadData = await uploadRes.json();
+
+      if (uploadData.success && (uploadData.cdnUrl || uploadData.url)) {
+        const logoUrl = uploadData.cdnUrl || uploadData.url;
+        setBranchLogoUrl(logoUrl);
+
+        const patchRes = await fetch('/api/branches', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            branchCode: selectedBranch,
+            logoUrl,
+          }),
+        });
+        const patchData = await patchRes.json();
+        if (patchData.success) {
+          showToast(`Official logo for ${selectedBranch} updated! Reflected on all workshops and events.`);
+          fetchData();
+        } else {
+          showToast(patchData.error || 'Failed to update branch logo in repository');
+        }
+      } else {
+        showToast('Logo upload failed');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Error uploading branch logo');
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  // UPLOAD STUDENT BODY EXECUTIVE POSTER
+  const handleUploadStudentBodyPoster = async (file: File | undefined) => {
+    if (!file) return;
+    setUploadingStudentBody(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'student-body');
+      formData.append('branch', selectedBranch);
+
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const uploadData = await uploadRes.json();
+
+      if (uploadData.success && (uploadData.cdnUrl || uploadData.url)) {
+        const posterUrl = uploadData.cdnUrl || uploadData.url;
+        setBranchStudentBodyPoster(posterUrl);
+        showToast('Executive poster uploaded! Fill in leadership details and click Save.');
+      } else {
+        showToast('Executive poster upload failed');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Error uploading student body poster');
+    } finally {
+      setUploadingStudentBody(false);
+    }
+  };
+
+  // SAVE STUDENT BODY EXECUTIVE POSTER & LEADERSHIP DETAILS
+  const handleSaveStudentBody = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!branchStudentBodyPoster) {
+      showToast('Please upload the Student Body Executive Poster first');
+      return;
+    }
+
+    setSavingStudentBody(true);
+    try {
+      const res = await fetch('/api/student-body', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          editionYear: targetEditionYear,
+          branchCode: selectedBranch,
+          posterUrl: branchStudentBodyPoster,
+          title: branchStudentBodyTitle || `${selectedBranch} Executive Student Body`,
+          description: branchStudentBodyDesc,
+          facultyAdvisor: branchFacultyAdvisor,
+          studentPresident: branchStudentPresident,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`Student Body Executive Poster published to landing page for Edition ${targetEditionYear}!`);
+        fetchData();
+      } else {
+        showToast(data.error || 'Failed to publish student body poster');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Error publishing student body poster');
+    } finally {
+      setSavingStudentBody(false);
+    }
+  };
+
+  // UPLOAD SPEAKER / RESOURCE PERSON PHOTO
+  const handleUploadSpeakerImage = async (file: File | undefined) => {
+    if (!file) return;
+    setUploadingSpeakerImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'speakers');
+      formData.append('branch', selectedBranch);
+
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const uploadData = await uploadRes.json();
+
+      if (uploadData.success && (uploadData.cdnUrl || uploadData.url)) {
+        const avatarUrl = uploadData.cdnUrl || uploadData.url;
+        setWsSpeakerAvatar(avatarUrl);
+        showToast('Resource Person photograph uploaded successfully!');
+      } else {
+        showToast('Speaker photo upload failed');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Error uploading speaker image');
+    } finally {
+      setUploadingSpeakerImage(false);
+    }
+  };
+
+  // UPDATE CURRENT EDITION DATES & SETTINGS
+  const handleUpdateEditionDates = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUpdatingEdition(true);
+    try {
+      const res = await fetch('/api/editions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          year: targetEditionYear,
+          dates: editEditionDates,
+          theme: editEditionTheme,
+          name: editEditionName,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`Edition ${targetEditionYear} dates updated to "${editEditionDates}"!`);
+        setShowEditEditionModal(false);
+        fetchData();
+      } else {
+        showToast(data.error || 'Failed to update edition dates');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Network error while updating edition dates');
+    } finally {
+      setUpdatingEdition(false);
+    }
+  };
+
 
   if (!isLoggedIn) {
     return (
@@ -939,21 +1164,63 @@ export default function OrganizerDashboard() {
 
       {/* Header Banner */}
       <div className="p-6 rounded-3xl bg-slate-900 text-white flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-sm">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
-              KITSW SAMSHODHINI &apos;{String(targetEditionYear).slice(-2)}
-            </span>
-            <span className="px-2.5 py-0.5 rounded text-[10px] font-bold bg-blue-600/30 text-blue-200 border border-blue-500/30">
-              {branchMeta.association}
-            </span>
+        <div className="flex items-center gap-4">
+          <div className="relative group shrink-0">
+            {branchLogoUrl ? (
+              <div className="w-14 h-14 rounded-2xl bg-white p-1 shadow-md border border-slate-700 overflow-hidden flex items-center justify-center">
+                <img src={branchLogoUrl} alt={branchMeta.association} className="w-full h-full object-contain" />
+              </div>
+            ) : (
+              <div className="w-14 h-14 rounded-2xl bg-slate-800 text-slate-400 border border-slate-700 flex flex-col items-center justify-center text-center p-1">
+                <span className="font-black text-xs text-white">{selectedBranch}</span>
+                <span className="text-[9px] text-slate-400 font-mono">Logo</span>
+              </div>
+            )}
+            <label 
+              className="absolute inset-0 bg-black/75 rounded-2xl opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity text-[9px] font-bold text-white text-center p-1"
+              title="Upload or Change Official Association Logo"
+            >
+              <span>Upload Logo</span>
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                onChange={(e) => handleUploadBranchLogo(e.target.files?.[0])}
+                disabled={uploadingLogo}
+              />
+            </label>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-            {branchMeta.fullName} ({selectedBranch})
-          </h1>
-          <p className="text-xs text-slate-400">
-            Official Department Portal • Real-time synchronization with Institute Records.
-          </p>
+
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
+                KITSW SAMSHODHINI &apos;{String(targetEditionYear).slice(-2)}
+              </span>
+              <span className="px-2.5 py-0.5 rounded text-[10px] font-bold bg-blue-600/30 text-blue-200 border border-blue-500/30">
+                {branchMeta.association}
+              </span>
+              {uploadingLogo && (
+                <span className="text-[10px] text-blue-400 font-bold animate-pulse">Uploading logo...</span>
+              )}
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+              {branchMeta.fullName} ({selectedBranch})
+            </h1>
+            <p className="text-xs text-slate-400 flex items-center gap-2">
+              <span>Official Department Portal</span>
+              <span>•</span>
+              <label className="text-blue-400 hover:text-blue-300 font-bold cursor-pointer underline text-[11px]">
+                {branchLogoUrl ? 'Change Logo' : 'Upload Association Logo'}
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="hidden" 
+                  onChange={(e) => handleUploadBranchLogo(e.target.files?.[0])}
+                  disabled={uploadingLogo}
+                />
+              </label>
+            </p>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
@@ -973,6 +1240,17 @@ export default function OrganizerDashboard() {
               ))}
             </select>
           </div>
+
+          {/* Edit Current Edition Dates Button */}
+          <button
+            type="button"
+            onClick={() => setShowEditEditionModal(true)}
+            className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition-all flex items-center gap-1.5 shadow-xs"
+            title="Change Dates for this Edition"
+          >
+            <Clock className="w-3.5 h-3.5 text-amber-400" />
+            <span>Dates: {editEditionDates.split(',')[0]}</span>
+          </button>
 
           {/* New Year Edition Modal Opener */}
           <button
@@ -1002,7 +1280,7 @@ export default function OrganizerDashboard() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex border-b border-slate-200 gap-6 text-xs font-bold overflow-x-auto pb-px">
+      <div className="flex border-b border-slate-200 gap-4 sm:gap-6 text-xs font-bold overflow-x-auto scrollbar-none pb-px px-1">
         <button
           onClick={() => setActiveTab('workshop')}
           className={`pb-3 transition-colors relative flex items-center gap-2 whitespace-nowrap ${
@@ -1057,6 +1335,21 @@ export default function OrganizerDashboard() {
         >
           <Camera className="w-4 h-4" />
           <span>Activity Photo Gallery ({galleryPhotos.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('studentBody')}
+          className={`pb-3 transition-colors relative flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'studentBody'
+              ? 'text-slate-900 border-b-2 border-slate-900 font-black'
+              : 'text-slate-400 hover:text-slate-700'
+          }`}
+        >
+          <Award className="w-4 h-4" />
+          <span>Student Body Poster</span>
+          {branchStudentBodyPoster && (
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+          )}
         </button>
 
         <button
@@ -1383,14 +1676,39 @@ export default function OrganizerDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Speaker Photo / Avatar URL</label>
-                  <input
-                    type="url"
-                    placeholder="https://images.unsplash.com/..."
-                    value={wsSpeakerAvatar}
-                    onChange={(e) => setWsSpeakerAvatar(e.target.value)}
-                    className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl outline-none font-mono text-slate-800"
-                  />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-[11px] font-bold text-slate-700">Speaker / Resource Person Photo</label>
+                    {uploadingSpeakerImage && <span className="text-[10px] text-blue-600 animate-pulse font-bold">Uploading...</span>}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {wsSpeakerAvatar ? (
+                      <div className="w-9 h-9 rounded-full overflow-hidden border border-slate-300 shrink-0 bg-slate-100">
+                        <img src={wsSpeakerAvatar} alt="Speaker" className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-9 h-9 rounded-full border border-dashed border-slate-300 flex items-center justify-center shrink-0 bg-white text-slate-400">
+                        <Users className="w-4 h-4" />
+                      </div>
+                    )}
+                    <input
+                      type="url"
+                      placeholder="Paste image URL or upload photo"
+                      value={wsSpeakerAvatar}
+                      onChange={(e) => setWsSpeakerAvatar(e.target.value)}
+                      className="flex-1 px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl outline-none font-mono text-slate-800"
+                    />
+                    <label className="cursor-pointer px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 shrink-0 shadow-xs">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>{uploadingSpeakerImage ? '...' : 'Upload'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleUploadSpeakerImage(e.target.files?.[0])}
+                        disabled={uploadingSpeakerImage}
+                      />
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -2317,6 +2635,198 @@ export default function OrganizerDashboard() {
       )}
 
       {/* ======================================================== */}
+      {/* TAB: STUDENT BODY POSTER & LEADERSHIP EXECUTIVE          */}
+      {/* ======================================================== */}
+      {activeTab === 'studentBody' && (
+        <form onSubmit={handleSaveStudentBody} className="space-y-6">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-8 shadow-xs">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold mb-2">
+                  <Award className="w-3.5 h-3.5" />
+                  <span>Student Body Executive ({selectedBranch})</span>
+                </div>
+                <h3 className="text-xl font-black text-slate-900">
+                  {branchMeta.association} Student Body Executive Poster & Leadership
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Upload the official Student Association Executive Poster and leadership credentials for edition {targetEditionYear}. These are highlighted on the fest landing page under the &quot;Student Body&quot; section.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="submit"
+                  disabled={savingStudentBody}
+                  className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-xs disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingStudentBody ? 'Saving...' : 'Save Executive Details'}</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              {/* Left Column: Form Details */}
+              <div className="lg:col-span-7 space-y-5">
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                    Executive Body Official Title *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={branchStudentBodyTitle}
+                    onChange={(e) => setBranchStudentBodyTitle(e.target.value)}
+                    placeholder={`e.g. ${branchMeta.association} Student Association Executive Body ${targetEditionYear}`}
+                    className="w-full px-3.5 py-2.5 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-400 focus:bg-white text-slate-900"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                      Faculty Advisor / Head of Department
+                    </label>
+                    <input
+                      type="text"
+                      value={branchFacultyAdvisor}
+                      onChange={(e) => setBranchFacultyAdvisor(e.target.value)}
+                      placeholder="e.g. Dr. P. Niranjan Reddy, HoD"
+                      className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 font-semibold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                      Student President / General Secretary
+                    </label>
+                    <input
+                      type="text"
+                      value={branchStudentPresident}
+                      onChange={(e) => setBranchStudentPresident(e.target.value)}
+                      placeholder="e.g. K. Sai Varun (President)"
+                      className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 font-semibold"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                    Executive Body Overview & Association Mission
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={branchStudentBodyDesc}
+                    onChange={(e) => setBranchStudentBodyDesc(e.target.value)}
+                    placeholder="Brief description of the student body, departmental association activities, committee members, and student initiatives for this academic fest..."
+                    className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none text-slate-800 resize-none leading-relaxed"
+                  />
+                </div>
+
+                {/* Poster Upload Widget */}
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                      <Upload className="w-4 h-4 text-blue-600" />
+                      Executive Poster Image Upload
+                    </span>
+                    {uploadingStudentBody && (
+                      <span className="text-xs font-bold text-blue-600 animate-pulse">Uploading to Git repository...</span>
+                    )}
+                  </div>
+
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Upload high-resolution portrait or landscape poster displaying the complete list of office bearers, student coordinators, and faculty advisors. Stored directly in the institutional repository and served via CDN.
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <input
+                      type="url"
+                      placeholder="https://... or upload file"
+                      value={branchStudentBodyPoster}
+                      onChange={(e) => setBranchStudentBodyPoster(e.target.value)}
+                      className="flex-1 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl outline-none font-mono text-slate-800"
+                    />
+                    <label className="cursor-pointer px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-xs shrink-0">
+                      <Upload className="w-4 h-4" />
+                      <span>{uploadingStudentBody ? 'Uploading...' : 'Upload Poster File'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleUploadStudentBodyPoster(e.target.files?.[0])}
+                        disabled={uploadingStudentBody}
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Live Poster Preview */}
+              <div className="lg:col-span-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Live Landing Page Display Preview
+                  </span>
+                  {branchStudentBodyPoster ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                      <CheckCircle2 className="w-3 h-3" /> Live on Landing Page
+                    </span>
+                  ) : (
+                    <span className="text-[11px] font-medium text-slate-400">Poster not uploaded yet</span>
+                  )}
+                </div>
+
+                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 shadow-md group flex items-center justify-center">
+                  {branchStudentBodyPoster ? (
+                    <>
+                      <img
+                        src={branchStudentBodyPoster}
+                        alt={`${selectedBranch} Student Body Poster`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex flex-col justify-end p-5">
+                        <div className="flex items-center gap-2 mb-2">
+                          {branchLogoUrl && (
+                            <img src={branchLogoUrl} alt={selectedBranch} className="w-8 h-8 rounded-full bg-white p-1 object-contain shadow-xs" />
+                          )}
+                          <span className="px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-black uppercase text-white border border-white/30 tracking-wider">
+                            {selectedBranch} · {branchMeta.association}
+                          </span>
+                        </div>
+                        <h4 className="text-white text-sm font-black line-clamp-2">
+                          {branchStudentBodyTitle || `${selectedBranch} Student Body`}
+                        </h4>
+                        {branchStudentPresident && (
+                          <p className="text-slate-300 text-[11px] font-medium mt-0.5">
+                            President: {branchStudentPresident}
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="p-8 text-center space-y-3 text-slate-400">
+                      <div className="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center mx-auto text-slate-500">
+                        <Award className="w-7 h-7" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-300">No Student Body Poster</p>
+                        <p className="text-[11px] text-slate-500 mt-1 max-w-xs mx-auto">
+                          Upload the executive body poster above to display your student committee on the Sumshodhini landing page.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      )}
+
+      {/* ======================================================== */}
       {/* TAB 4: DELEGATE ROSTER & CSV EXPORT */}
       {/* ======================================================== */}
       {activeTab === 'roster' && (
@@ -2385,12 +2895,12 @@ export default function OrganizerDashboard() {
       {/* MODAL: INITIALIZE NEW ANNUAL SYMPOSIUM EDITION           */}
       {/* ======================================================== */}
       {showNewEditionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 sm:p-8 space-y-6 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full p-4 sm:p-8 space-y-5 sm:space-y-6 relative max-h-[92vh] overflow-y-auto">
             <button
               type="button"
               onClick={() => setShowNewEditionModal(false)}
-              className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors"
+              className="absolute top-4 right-4 sm:top-5 sm:right-5 p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -2488,6 +2998,93 @@ export default function OrganizerDashboard() {
                   className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors shadow-xs disabled:opacity-50"
                 >
                   {creatingEdition ? 'Initializing...' : 'Initialize Edition'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL: EDIT DATES & THEME FOR CURRENT EDITION            */}
+      {/* ======================================================== */}
+      {showEditEditionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full p-4 sm:p-8 space-y-5 sm:space-y-6 relative max-h-[92vh] overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => setShowEditEditionModal(false)}
+              className="absolute top-4 right-4 sm:top-5 sm:right-5 p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold mb-2">
+                <Clock className="w-3.5 h-3.5 text-amber-600" />
+                <span>Symposium Scheduling & Dates</span>
+              </div>
+              <h3 className="text-xl font-black text-slate-900">
+                Modify Fest Dates for {targetEditionYear}
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Update the official festival dates, theme, and title for edition {targetEditionYear}. Any changes immediately update the countdown and badges across the entire symposium platform.
+              </p>
+            </div>
+
+            <form onSubmit={handleUpdateEditionDates} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">Official Fest Dates *</label>
+                <input
+                  type="text"
+                  value={editEditionDates}
+                  onChange={(e) => setEditEditionDates(e.target.value)}
+                  required
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+                  placeholder="October 30–31, 2026"
+                />
+                <p className="text-[10px] text-slate-400">
+                  e.g. October 30–31, 2026 or October 22–23, 2027
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">Edition Display Name</label>
+                <input
+                  type="text"
+                  value={editEditionName}
+                  onChange={(e) => setEditEditionName(e.target.value)}
+                  required
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+                  placeholder={`Sumshodhini '${String(targetEditionYear).slice(-2)}`}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">Theme / Tagline</label>
+                <input
+                  type="text"
+                  value={editEditionTheme}
+                  onChange={(e) => setEditEditionTheme(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600/20 font-medium"
+                  placeholder="National Science & Technology Symposium"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowEditEditionModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updatingEdition}
+                  className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors shadow-xs disabled:opacity-50"
+                >
+                  {updatingEdition ? 'Saving Dates...' : 'Save Dates & Configuration'}
                 </button>
               </div>
             </form>

@@ -87,7 +87,7 @@ export default function LegacyVault() {
 
         {/* Main Exhibition Card */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="relative aspect-[21/8] max-h-[300px] w-full overflow-hidden bg-slate-900">
+          <div className="relative aspect-[16/10] sm:aspect-[21/8] min-h-[200px] sm:min-h-[240px] max-h-[320px] w-full overflow-hidden bg-slate-900">
             <img 
               src={currentEdition.coverImage} 
               alt={`Samshodhani ${currentEdition.year}`}
@@ -95,15 +95,15 @@ export default function LegacyVault() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
 
-            <div className="absolute bottom-5 left-5 right-5 text-white">
+            <div className="absolute bottom-4 sm:bottom-5 left-4 sm:left-5 right-4 sm:right-5 text-white">
               <span className="text-[10px] font-mono text-slate-300 uppercase block">
                 {currentEdition.dates}
               </span>
-              <h3 className="text-xl sm:text-2xl font-bold mt-1">
+              <h3 className="text-base sm:text-2xl font-bold mt-1 line-clamp-2">
                 &quot;{currentEdition.theme || 'Innovating at the Frontiers of Engineering'}&quot;
               </h3>
               {currentEdition.chiefGuest?.name && (
-                <p className="text-xs text-slate-300 mt-0.5">
+                <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5 line-clamp-1">
                   Chief Guest: <strong className="text-white">{currentEdition.chiefGuest.name}</strong> ({currentEdition.chiefGuest.title || 'Distinguished Keynote'})
                 </p>
               )}

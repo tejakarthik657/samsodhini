@@ -77,18 +77,18 @@ export default function HeroSection({
         {/* Top Badges & Emblem Header */}
         <div className="text-center max-w-4xl mx-auto space-y-4">
           {/* Institutional Affiliation Pill */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-slate-700 border border-slate-200/90 shadow-xs text-xs font-bold shimmer-badge">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <div className="inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-2xl sm:rounded-full bg-white/90 backdrop-blur-md text-slate-700 border border-slate-200/90 shadow-xs text-[11px] sm:text-xs font-bold shimmer-badge max-w-full text-center">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
             <span className="text-slate-900">KITSW Warangal</span>
-            <span className="text-slate-300">•</span>
+            <span className="text-slate-300 hidden sm:inline">•</span>
             <span className="text-slate-600">ISTE Student Chapter</span>
-            <span className="text-slate-300">•</span>
+            <span className="text-slate-300 hidden sm:inline">•</span>
             <span className="text-slate-600">Technical Club & SAC</span>
           </div>
 
           {/* Central Logo Emblem & Universal Title */}
           <div className="flex flex-col items-center justify-center pt-1">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl p-2.5 bg-white border border-slate-200/90 shadow-[0_16px_36px_-12px_rgba(15,23,42,0.1)] flex items-center justify-center mb-3 transition-transform hover:scale-105 duration-300">
+            <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-3xl p-2 sm:p-2.5 bg-white border border-slate-200/90 shadow-[0_16px_36px_-12px_rgba(15,23,42,0.1)] flex items-center justify-center mb-2.5 sm:mb-3 transition-transform hover:scale-105 duration-300">
               <img 
                 src="/Sumshodhini26icon.png" 
                 alt="Sumshodhini Official Emblem" 
@@ -97,8 +97,8 @@ export default function HeroSection({
               />
             </div>
 
-            <div className="flex items-center justify-center gap-3">
-              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-950 tracking-tight leading-none">
+            <div className="flex items-center justify-center gap-2 sm:gap-3">
+              <h1 className="text-3xl sm:text-6xl lg:text-7xl font-black text-slate-950 tracking-tight leading-none">
                 SUMSHODHINI
               </h1>
 
@@ -108,7 +108,7 @@ export default function HeroSection({
               </span>
             </div>
 
-            <p className="text-xs sm:text-sm font-mono uppercase tracking-widest text-slate-500 font-bold mt-2">
+            <p className="text-[10px] sm:text-sm font-mono uppercase tracking-wider sm:tracking-widest text-slate-500 font-bold mt-2">
               National Science & Technology Symposium • 2-Day Symposium Architecture
             </p>
 
@@ -120,64 +120,64 @@ export default function HeroSection({
             )}
           </div>
 
-          <p className="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed max-w-2xl mx-auto">
+          <p className="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed max-w-2xl mx-auto px-2">
             The platform for student technical exploration, branch flagship masterclasses, and national challenge arenas. Archiving engineering pedagogy and innovation across Kakatiya Institute of Technology & Science.
           </p>
 
           {/* Real-time DB Count Pills */}
-          <div className="flex items-center justify-center gap-3 pt-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-50/80 border border-blue-200/60 text-xs text-blue-900 font-bold">
-              <BookOpen className="w-3.5 h-3.5 text-blue-600" />
-              <span>{totalWorkshopsCount} Flagship Workshop{totalWorkshopsCount !== 1 ? 's' : ''} Published</span>
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-blue-50/80 border border-blue-200/60 text-[11px] sm:text-xs text-blue-900 font-bold">
+              <BookOpen className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+              <span>{totalWorkshopsCount} Workshop{totalWorkshopsCount !== 1 ? 's' : ''}</span>
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-50/80 border border-purple-200/60 text-xs text-purple-900 font-bold">
-              <Trophy className="w-3.5 h-3.5 text-purple-600" />
-              <span>{totalEventsCount} Competition Arena{totalEventsCount !== 1 ? 's' : ''} Published</span>
+            <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-purple-50/80 border border-purple-200/60 text-[11px] sm:text-xs text-purple-900 font-bold">
+              <Trophy className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+              <span>{totalEventsCount} Competition{totalEventsCount !== 1 ? 's' : ''}</span>
             </div>
           </div>
 
           {/* 2-Day Segmented Controller */}
-          <div className="pt-2">
-            <div className="inline-flex p-1.5 rounded-full bg-white border border-slate-200 shadow-[0_8px_24px_-8px_rgba(15,23,42,0.08)] gap-1.5">
+          <div className="pt-2 w-full flex justify-center">
+            <div className="w-full sm:w-auto grid grid-cols-3 sm:flex p-1 sm:p-1.5 rounded-2xl sm:rounded-full bg-white border border-slate-200 shadow-[0_8px_24px_-8px_rgba(15,23,42,0.08)] gap-1">
               <button
                 type="button"
                 onClick={() => onSelectCategory('all')}
-                className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all ${
+                className={`px-2 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-[11px] sm:text-xs font-bold transition-all text-center ${
                   selectedCategory === 'all'
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-950 hover:bg-slate-50'
                 }`}
               >
-                All 2-Day Tracks
+                All Tracks
               </button>
 
               <button
                 type="button"
                 onClick={() => onSelectCategory('workshops')}
-                className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 ${
+                className={`px-2 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1.5 text-center ${
                   selectedCategory === 'workshops'
                     ? 'bg-blue-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-950 hover:bg-slate-50'
                 }`}
               >
-                <span className="w-2 h-2 rounded-full bg-blue-400"></span>
-                <span>Day 1: Workshops</span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-900 font-bold">1/Branch</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0"></span>
+                <span>Day 1</span>
+                <span className="hidden sm:inline">Workshops</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => onSelectCategory('events')}
-                className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 ${
+                className={`px-2 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1.5 text-center ${
                   selectedCategory === 'events'
                     ? 'bg-purple-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-950 hover:bg-slate-50'
                 }`}
               >
-                <span className="w-2 h-2 rounded-full bg-purple-400"></span>
-                <span>Day 2: Competitions</span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-purple-100 text-purple-900 font-bold">Multi</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0"></span>
+                <span>Day 2</span>
+                <span className="hidden sm:inline">Contests</span>
               </button>
             </div>
           </div>

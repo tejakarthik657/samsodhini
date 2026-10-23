@@ -16,7 +16,7 @@ export default function LegacyPage() {
 
         {/* Institutional Charter */}
         <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xs space-y-3">
+          <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-200/90 shadow-xs space-y-3">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-blue-600" />
               <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">

@@ -148,7 +148,7 @@ export default function GalleryPage() {
             </div>
 
             {/* Classification Type Selector */}
-            <div className="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+            <div className="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto scrollbar-none pb-1 md:pb-0">
               <button
                 type="button"
                 onClick={() => setSelectedType('ALL')}
@@ -190,7 +190,7 @@ export default function GalleryPage() {
           </div>
 
           {/* Department & Club Selector Chips */}
-          <div className="pt-3 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto pb-1">
+          <div className="pt-3 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
             <span className="text-[11px] font-bold text-slate-400 mr-1 flex items-center gap-1 shrink-0">
               <Filter className="w-3 h-3" /> Department:
             </span>
@@ -280,7 +280,7 @@ export default function GalleryPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
             {filteredPhotos.map((photo, index) => {
               const branchMeta = KITSW_BRANCHES.find((b) => b.code === photo.branchCode);
               return (
@@ -342,37 +342,37 @@ export default function GalleryPage() {
       {/* LIGHTBOX INSPECTION MODAL */}
       {activePhoto && (
         <div 
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-6 animate-in fade-in duration-200"
           onClick={() => setActiveLightboxIndex(null)}
         >
           <div 
-            className="relative max-w-5xl w-full max-h-[92vh] flex flex-col bg-slate-950 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl"
+            className="relative max-w-5xl w-full max-h-[92vh] flex flex-col bg-slate-950 rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-800 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Lightbox Topbar */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-800/80 bg-slate-950/70 text-white">
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-1 rounded-md text-xs font-black bg-blue-600 text-white">
+            <div className="flex items-center justify-between p-3 sm:p-4 border-b border-slate-800/80 bg-slate-950/70 text-white">
+              <div className="flex items-center gap-2 min-w-0 pr-2">
+                <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-black bg-blue-600 text-white shrink-0">
                   {activePhoto.branchCode}
                 </span>
-                <div className="flex flex-col">
-                  <h3 className="text-sm font-bold text-slate-100 truncate max-w-md sm:max-w-xl">
+                <div className="flex flex-col min-w-0">
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-100 truncate max-w-xs sm:max-w-xl">
                     {activePhoto.itemTitle}
                   </h3>
-                  <span className="text-[10px] text-slate-400">
-                    {activePhoto.itemType === 'workshop' ? 'Day 1 Flagship Workshop' : 'Day 2 National Arena Competition'} • Edition {activePhoto.editionYear}
+                  <span className="text-[9px] sm:text-[10px] text-slate-400 truncate">
+                    {activePhoto.itemType === 'workshop' ? 'Day 1 Workshop' : 'Day 2 Contest'} • Edition {activePhoto.editionYear}
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-bold text-slate-400">
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <span className="text-[11px] sm:text-xs font-mono font-bold text-slate-400">
                   {activeLightboxIndex! + 1} / {filteredPhotos.length}
                 </span>
                 <button
                   type="button"
                   onClick={() => setActiveLightboxIndex(null)}
-                  className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition-colors"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -380,7 +380,7 @@ export default function GalleryPage() {
             </div>
 
             {/* Photo Viewport */}
-            <div className="relative flex-1 bg-black flex items-center justify-center min-h-[300px] max-h-[70vh] overflow-hidden">
+            <div className="relative flex-1 bg-black flex items-center justify-center min-h-[220px] sm:min-h-[300px] max-h-[70vh] overflow-hidden">
               <img
                 src={activePhoto.imageUrl}
                 alt={activePhoto.caption || activePhoto.itemTitle}

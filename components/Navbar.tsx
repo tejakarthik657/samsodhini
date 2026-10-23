@@ -14,7 +14,9 @@ import {
   ArrowRight,
   Sparkles,
   ChevronDown,
-  Check
+  Check,
+  Award,
+  Camera
 } from 'lucide-react';
 import { Edition } from '../types';
 
@@ -48,7 +50,7 @@ export default function Navbar({
     if (propEditions && propEditions.length > 0) {
       setLocalEditions(propEditions);
     } else {
-      async function fetchEditions() {
+      const fetchEditions = async () => {
         try {
           const res = await fetch('/api/editions');
           const json = await res.json();
@@ -61,7 +63,7 @@ export default function Navbar({
         } catch (err) {
           console.error('Failed to load editions in navbar:', err);
         }
-      }
+      };
       fetchEditions();
     }
   }, [propEditions, selectedYear]);
@@ -97,20 +99,22 @@ export default function Navbar({
   const editionsList = propEditions && propEditions.length > 0 ? propEditions : localEditions;
 
   return (
-    <header className="fixed top-2 sm:top-4 inset-x-0 z-50 max-w-6xl mx-auto px-3 sm:px-6 pointer-events-none">
+    <header className="fixed top-2 sm:top-4 inset-x-0 z-50 max-w-6xl mx-auto px-2.5 sm:px-6 pointer-events-none">
       {/* Floating Island Navigation Capsule */}
       <div 
-        className={`pointer-events-auto transition-all duration-300 rounded-full floating-glass-dock ${
+        className={`pointer-events-auto transition-all duration-300 floating-glass-dock ${
+          mobileMenuOpen ? 'rounded-3xl' : 'rounded-full'
+        } ${
           isScrolled 
-            ? 'py-2 px-3 sm:px-4 bg-white/90 shadow-[0_20px_40px_-15px_rgba(15,23,42,0.12)]' 
-            : 'py-2.5 px-3.5 sm:px-5 bg-white/80 shadow-[0_12px_32px_-10px_rgba(15,23,42,0.08)]'
+            ? 'py-2 px-3 sm:px-4 bg-white/95 shadow-[0_20px_40px_-15px_rgba(15,23,42,0.12)]' 
+            : 'py-2 px-3 sm:py-2.5 sm:px-5 bg-white/90 shadow-[0_12px_32px_-10px_rgba(15,23,42,0.08)]'
         }`}
       >
         <div className="flex items-center justify-between gap-2">
           {/* Brand Logo & Dynamic Edition Selector */}
-          <div className="flex items-center gap-2.5">
-            <Link href="/" className="flex items-center gap-2 group shrink-0">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white p-1 border border-slate-200/90 shadow-xs flex items-center justify-center transition-transform group-hover:scale-105 duration-200">
+          <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-1.5 sm:gap-2 group shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white p-1 border border-slate-200/90 shadow-xs flex items-center justify-center transition-transform group-hover:scale-105 duration-200 shrink-0">
                 <img 
                   src="/Sumshodhini26icon.png" 
                   alt="Sumshodhini Emblem" 
@@ -120,8 +124,8 @@ export default function Navbar({
               </div>
 
               <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm sm:text-base font-black tracking-tight text-slate-900 group-hover:text-blue-900 transition-colors">
+                <div className="flex items-center gap-1">
+                  <span className="text-xs sm:text-base font-black tracking-tight text-slate-900 group-hover:text-blue-900 transition-colors">
                     SUMSHODHINI
                   </span>
                 </div>
@@ -137,7 +141,7 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={() => setEditionDropdownOpen(!editionDropdownOpen)}
-                className="flex items-center gap-1 text-[11px] font-mono font-black text-slate-800 bg-slate-100 hover:bg-slate-200/80 px-2 py-0.5 rounded-full border border-slate-200 transition-all shadow-2xs"
+                className="flex items-center gap-1 text-[10px] sm:text-[11px] font-mono font-black text-slate-800 bg-slate-100 hover:bg-slate-200/80 px-2 py-0.5 rounded-full border border-slate-200 transition-all shadow-2xs"
                 title="Select Symposium Edition"
               >
                 <span>&apos;{String(currentYear).slice(-2)}</span>
@@ -219,6 +223,13 @@ export default function Navbar({
             </Link>
 
             <Link 
+              href="/#student-body" 
+              className="px-3 py-1.5 rounded-full hover:bg-white hover:text-slate-950 transition-all"
+            >
+              Student Body
+            </Link>
+
+            <Link 
               href="/#heritage" 
               className="px-3 py-1.5 rounded-full hover:bg-white hover:text-slate-950 transition-all"
             >
@@ -257,8 +268,8 @@ export default function Navbar({
 
         {/* Mobile Dropdown Menu Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden pt-3 pb-2 mt-2 border-t border-slate-200 flex flex-col gap-2">
-            <div className="flex items-center justify-between px-3 py-1 text-xs text-slate-500 font-semibold bg-slate-50 rounded-xl">
+          <div className="lg:hidden pt-3 pb-2 mt-2 border-t border-slate-200 flex flex-col gap-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center justify-between px-3 py-1.5 text-xs text-slate-500 font-semibold bg-slate-50 rounded-xl mb-1">
               <span>Selected Academic Edition:</span>
               <span className="font-mono font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
                 {currentYear}
@@ -268,51 +279,82 @@ export default function Navbar({
             <Link
               href="/#workshops"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2"
+              className="px-3 py-2.5 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
             >
-              <span className="w-2 h-2 rounded-full bg-blue-600"></span>
-              <span>Day 1: Flagship Masterclasses</span>
+              <div className="w-6 h-6 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
+                <BookOpen className="w-3.5 h-3.5" />
+              </div>
+              <div className="flex flex-col">
+                <span>Day 1: Flagship Masterclasses</span>
+                <span className="text-[10px] text-slate-400 font-normal">1 Workshop Per Branch</span>
+              </div>
             </Link>
 
             <Link
               href="/#events"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2"
+              className="px-3 py-2.5 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
             >
-              <span className="w-2 h-2 rounded-full bg-purple-600"></span>
-              <span>Day 2: National Arena Competitions</span>
+              <div className="w-6 h-6 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center shrink-0">
+                <Trophy className="w-3.5 h-3.5" />
+              </div>
+              <div className="flex flex-col">
+                <span>Day 2: National Arena Competitions</span>
+                <span className="text-[10px] text-slate-400 font-normal">Multi-Contest Arena</span>
+              </div>
             </Link>
 
             <Link
               href="/#schedule"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100"
+              className="px-3 py-2.5 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
             >
-              Official 2-Day Itinerary
+              <div className="w-6 h-6 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+                <Calendar className="w-3.5 h-3.5" />
+              </div>
+              <span>Official 2-Day Itinerary</span>
+            </Link>
+
+            <Link
+              href="/#student-body"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2.5 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
+            >
+              <div className="w-6 h-6 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
+                <Award className="w-3.5 h-3.5" />
+              </div>
+              <span>Student Body Executive Posters</span>
             </Link>
 
             <Link
               href="/#heritage"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100"
+              className="px-3 py-2.5 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
             >
-              50-Year Heritage Vault
+              <div className="w-6 h-6 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+                <Archive className="w-3.5 h-3.5" />
+              </div>
+              <span>50-Year Heritage Vault</span>
             </Link>
 
             <Link
               href="/gallery"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100"
+              className="px-3 py-2.5 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
             >
-              Media Gallery
+              <div className="w-6 h-6 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center shrink-0">
+                <Camera className="w-3.5 h-3.5" />
+              </div>
+              <span>Media Gallery</span>
             </Link>
 
             <Link
               href="/organizer"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2.5 rounded-xl text-xs font-bold bg-slate-900 text-white text-center shadow-xs mt-1"
+              className="px-3 py-3 rounded-xl text-xs font-bold bg-slate-900 text-white text-center shadow-xs mt-1 flex items-center justify-center gap-2"
             >
-              Organizer Portal
+              <ShieldCheck className="w-4 h-4" />
+              <span>Organizer Portal</span>
             </Link>
           </div>
         )}

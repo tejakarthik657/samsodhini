@@ -89,9 +89,9 @@ export default function EventsPage() {
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-36 pb-16 w-full space-y-8">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <div className="flex items-center justify-center gap-2">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-50 text-purple-900 border border-purple-200 text-xs font-bold">
-              <Trophy className="w-3.5 h-3.5 text-purple-600" />
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 rounded-2xl sm:rounded-full bg-purple-50 text-purple-900 border border-purple-200 text-[11px] sm:text-xs font-bold text-center">
+              <Trophy className="w-3.5 h-3.5 text-purple-600 shrink-0" />
               <span>DAY 2 EXCLUSIVE • NATIONAL COMPETITIONS & ARENA</span>
             </div>
             <span className="text-xs font-mono font-bold bg-white px-2.5 py-1 rounded-full border border-slate-200 text-slate-700 shadow-2xs">
@@ -99,7 +99,7 @@ export default function EventsPage() {
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-slate-950 tracking-tight">
+          <h1 className="text-2xl sm:text-5xl font-black text-slate-950 tracking-tight">
             National Technical Competitions
           </h1>
 
@@ -123,7 +123,7 @@ export default function EventsPage() {
             </div>
 
             {/* Department tabs */}
-            <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none w-full sm:w-auto pb-1 sm:pb-0">
               <button
                 onClick={() => setSelectedBranch('ALL')}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shrink-0 ${
@@ -152,7 +152,7 @@ export default function EventsPage() {
           </div>
 
           {/* Category Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pt-2 border-t border-slate-100 pb-1">
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-2 border-t border-slate-100 pb-1">
             <span className="text-[11px] font-bold text-slate-400 mr-1 flex items-center gap-1 shrink-0">
               <Filter className="w-3 h-3" /> Categories:
             </span>

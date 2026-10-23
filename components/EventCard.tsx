@@ -20,7 +20,7 @@ export default function EventCard({ event, onSelect, onQuickRegister }: EventCar
 
   return (
     <div 
-      className="group bg-white rounded-3xl border border-slate-200/90 hover:border-slate-300 shadow-xs hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer bento-card"
+      className="group bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 hover:border-slate-300 shadow-xs hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer bento-card"
       onClick={() => onSelect(event)}
     >
       <div>
@@ -42,9 +42,16 @@ export default function EventCard({ event, onSelect, onQuickRegister }: EventCar
 
           {/* Badges on Top */}
           <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-black bg-white text-slate-900 shadow-xs">
-              {event.branch}
-            </span>
+            <div className="flex items-center gap-1.5">
+              {event.branchLogo && (
+                <div className="w-6 h-6 rounded-full overflow-hidden bg-white p-0.5 shadow-xs border border-white/70 shrink-0">
+                  <img src={event.branchLogo} alt={event.branch} className="w-full h-full object-contain" />
+                </div>
+              )}
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-black bg-white text-slate-900 shadow-xs">
+                {event.branch}
+              </span>
+            </div>
 
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-900/80 backdrop-blur-md text-purple-100 border border-purple-400/30">
               <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
@@ -66,7 +73,7 @@ export default function EventCard({ event, onSelect, onQuickRegister }: EventCar
         </div>
 
         {/* Body */}
-        <div className="p-5 space-y-3.5">
+        <div className="p-4 sm:p-5 space-y-3 sm:space-y-3.5">
           <div>
             <div className="inline-block text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100 mb-1.5">
               {event.category}
@@ -133,7 +140,7 @@ export default function EventCard({ event, onSelect, onQuickRegister }: EventCar
       </div>
 
       {/* Footer Actions */}
-      <div className="p-5 pt-0 grid grid-cols-2 gap-2">
+      <div className="p-4 sm:p-5 pt-0 grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={(e) => {

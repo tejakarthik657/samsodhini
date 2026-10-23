@@ -59,6 +59,7 @@ export interface Workshop {
   editionYear?: number;
   associationName?: string;
   associationShort?: string;
+  branchLogo?: string | null;
 }
 
 export interface EventRound {
@@ -99,6 +100,7 @@ export interface FestEvent {
   editionYear?: number;
   associationName?: string;
   associationShort?: string;
+  branchLogo?: string | null;
 }
 
 export interface Department {
@@ -116,6 +118,8 @@ export interface Department {
   accentColor: string;
   bgLightColor: string;
   description: string;
+  logoUrl?: string;
+  studentBodyPosterUrl?: string;
 }
 
 export interface ScheduleItem {
@@ -195,3 +199,20 @@ export interface GalleryItem {
   createdAt: string;
 }
 
+export interface StudentBodyPoster {
+  id: number;
+  editionYear: number;
+  branchCode: string;
+  posterUrl: string;
+  title: string;
+  description?: string;
+  facultyAdvisor?: string;
+  studentPresident?: string;
+  createdAt: string;
+  branchName?: string;
+  associationName?: string;
+  associationShort?: string;
+  accentColor?: string;
+  bgLightColor?: string;
+  logoUrl?: string;
+}

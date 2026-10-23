@@ -46,9 +46,9 @@ export default function Footer() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Main Luxury White Card Container */}
-        <div className="bg-white rounded-[2.5rem] border border-slate-200/90 shadow-[0_20px_50px_-20px_rgba(15,23,42,0.06)] p-8 sm:p-14 space-y-12">
+        <div className="bg-white rounded-3xl sm:rounded-[2.5rem] border border-slate-200/90 shadow-[0_20px_50px_-20px_rgba(15,23,42,0.06)] p-5 sm:p-10 lg:p-14 space-y-8 sm:space-y-12">
           {/* Top Brand Banner */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-10 border-b border-slate-100">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-8 sm:pb-10 border-b border-slate-100">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs p-2 flex items-center justify-center shrink-0">
                 <img 

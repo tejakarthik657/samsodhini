@@ -42,7 +42,8 @@ export async function GET(req: NextRequest) {
         b.association_name as "associationName",
         b.association_short as "associationShort",
         b.accent_color as "accentColor",
-        b.bg_light_color as "bgLightColor"
+        b.bg_light_color as "bgLightColor",
+        b.logo_url as "branchLogo"
       FROM events e
       LEFT JOIN branches b ON e.branch_code = b.code
     `;
@@ -124,6 +125,7 @@ export async function GET(req: NextRequest) {
       associationShort: row.associationShort,
       accentColor: row.accentColor,
       bgLightColor: row.bgLightColor,
+      branchLogo: row.branchLogo || null,
     }));
 
     return NextResponse.json({

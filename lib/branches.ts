@@ -8,6 +8,11 @@ export interface BranchInfo {
   category: 'Computing' | 'Core' | 'Circuits' | 'Institutional';
   accentColor: string;
   bgLightColor: string;
+  logoUrl?: string;
+  studentBodyPosterUrl?: string;
+  studentBodyTitle?: string;
+  facultyAdvisor?: string;
+  studentPresident?: string;
 }
 
 export const KITSW_BRANCHES: BranchInfo[] = [

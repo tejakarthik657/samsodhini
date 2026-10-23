@@ -15,7 +15,8 @@ import {
   Share2, 
   Phone, 
   FileText,
-  Check
+  Check,
+  BookOpen
 } from 'lucide-react';
 import { Workshop, FestEvent } from '../types';
 
@@ -60,7 +61,7 @@ export default function NetflixDetailModal({ item, onClose, onRegisterClick }: N
   const fillPercentage = Math.min(100, Math.round((currentReg / maxCap) * 100));
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3 sm:p-5 lg:p-8 animate-fade-in">
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-2 sm:p-5 lg:p-8 animate-fade-in">
       {/* 
         NETFLIX AMBIENT BACKDROP:
         Blown-up poster image with heavy gaussian blur and soft neutral scrim 
@@ -76,24 +77,31 @@ export default function NetflixDetailModal({ item, onClose, onRegisterClick }: N
 
       {/* Main Glass Modal Card */}
       <div 
-        className="relative w-full max-w-4xl bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden z-10 my-auto animate-scale-up"
+        className="relative w-full max-w-4xl bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl overflow-hidden z-10 my-auto animate-scale-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Floating Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors"
           aria-label="Close modal"
         >
           <X className="w-4 h-4" />
         </button>
 
-        <div className="p-5 sm:p-7 max-h-[88vh] overflow-y-auto space-y-6">
+        <div className="p-4 sm:p-7 max-h-[92vh] sm:max-h-[88vh] overflow-y-auto space-y-5 sm:space-y-6">
           {/* Header Badges */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-900 border border-slate-200">
-              Department of {item.branch}
-            </span>
+          <div className="flex flex-wrap items-center gap-2 pr-8 sm:pr-0">
+            <div className="flex items-center gap-1.5">
+              {item.branchLogo && (
+                <div className="w-6 h-6 rounded-full overflow-hidden bg-white p-0.5 border border-slate-200 shadow-2xs shrink-0">
+                  <img src={item.branchLogo} alt={item.branch} className="w-full h-full object-contain" />
+                </div>
+              )}
+              <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-900 border border-slate-200">
+                Department of {item.branch}
+              </span>
+            </div>
 
             {isWorkshop ? (
               <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-900 border border-blue-200">
@@ -105,9 +113,12 @@ export default function NetflixDetailModal({ item, onClose, onRegisterClick }: N
               </span>
             )}
 
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 ml-auto">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              <span>Live Attendance: <strong>{currentReg}</strong> / {maxCap} Seats</span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 w-full sm:w-auto sm:ml-auto justify-between sm:justify-start">
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span>Live Attendance:</span>
+              </span>
+              <span><strong>{currentReg}</strong> / {maxCap} Seats</span>
             </span>
           </div>
 
@@ -320,7 +331,7 @@ export default function NetflixDetailModal({ item, onClose, onRegisterClick }: N
 
               {/* TABS */}
               <div>
-                <div className="flex border-b border-slate-200 gap-4 text-xs font-semibold mb-2.5">
+                <div className="flex border-b border-slate-200 gap-3 sm:gap-4 text-xs font-semibold mb-2.5 overflow-x-auto scrollbar-none whitespace-nowrap pb-1">
                   <button
                     onClick={() => setActiveTab('syllabus')}
                     className={`pb-1.5 transition-colors relative ${
