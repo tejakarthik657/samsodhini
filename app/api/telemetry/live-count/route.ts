@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '../../../../lib/db';
+import { requireBranch, isResponse } from '../../../../lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +15,11 @@ export async function PATCH(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    const table = type === 'event' ? 'events' : 'workshops';
+    const owner = await query(`SELECT branch_code FROM ${table} WHERE id = $1 OR branch_code = $1 LIMIT 1`, [id]);
+    const guard = await requireBranch(req, owner.rows[0]?.branch_code);
+    if (isResponse(guard)) return guard;
 
     let updatedCount = 0;
     let maxCap = 200;

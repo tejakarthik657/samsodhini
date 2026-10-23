@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { Workshop, FestEvent, Edition, GalleryItem } from '../types';
 import AdminPosterPanel from './AdminPosterPanel';
+import { ChangePasswordDialog, ResetPasswordsPanel } from './AccountSecurity';
 
 const ADMIN_EMAIL = 'tc.sac@kitsw.ac.in';
 
@@ -60,7 +61,9 @@ export default function OrganizerDashboard() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authenticatedBranch, setAuthenticatedBranch] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [adminToken, setAdminToken] = useState<string | null>(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [mustChange, setMustChange] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState('CSE');
@@ -343,62 +346,73 @@ export default function OrganizerDashboard() {
     }
   }, [selectedBranch, workshops]);
 
+  // Pick up an existing session (the JWT cookie) so a refresh does not sign you out.
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/session');
+        const data = await res.json();
+        if (data.authenticated) {
+          if (data.role === 'ADMIN') {
+            setIsAdmin(true);
+            setAuthenticatedBranch('ADMIN');
+          } else {
+            setIsAdmin(false);
+            setAuthenticatedBranch(data.branchCode);
+            setSelectedBranch(data.branchCode);
+          }
+          setIsLoggedIn(true);
+        }
+      } catch {
+        /* stay signed out */
+      } finally {
+        setSessionChecked(true);
+      }
+    })();
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
-
-    // The festival admin signs in with their email; the server checks the password.
-    if (username.trim().toLowerCase() === ADMIN_EMAIL) {
-      try {
-        const res = await fetch('/api/organizer/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ branchCode: selectedBranch, username: username.trim(), password }),
-        });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
-          setLoginError(data.error || 'Sign-in failed.');
-          return;
-        }
-        setIsAdmin(true);
-        setAdminToken(data.adminToken || null);
-        setAuthenticatedBranch('ADMIN');
-        setIsLoggedIn(true);
-        showToast('Signed in as festival admin');
-      } catch {
-        setLoginError('Could not reach the server. Try again.');
-      }
-      return;
-    }
-
     try {
-      const res = await fetch('/api/organizer/login', {
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ branchCode: selectedBranch, username, password }),
+        body: JSON.stringify({ branchCode: selectedBranch, username: username.trim(), password }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
         setLoginError(data.error || 'Sign-in failed. Try again.');
         return;
       }
-      const authBr = data.organizer?.branchCode || selectedBranch;
-      setAuthenticatedBranch(authBr);
-      setSelectedBranch(authBr);
-      setIsAdmin(false);
+      const admin = data.organizer?.role === 'ADMIN';
+      setIsAdmin(admin);
+      if (admin) {
+        setAuthenticatedBranch('ADMIN');
+      } else {
+        const authBr = data.organizer?.branchCode || selectedBranch;
+        setAuthenticatedBranch(authBr);
+        setSelectedBranch(authBr);
+      }
       setIsLoggedIn(true);
       setPassword('');
-      showToast(`Signed in as ${BRANCH_ORGANIZER_DEFAULTS[authBr]?.association || authBr}`);
+      if (data.mustChangePassword) {
+        setMustChange(true);
+        setShowPasswordDialog(true);
+      }
+      showToast(admin ? 'Signed in as festival admin' : `Signed in as ${BRANCH_ORGANIZER_DEFAULTS[data.organizer?.branchCode]?.association || selectedBranch}`);
     } catch (err) {
       setLoginError('Could not reach the server. Check your connection and try again.');
     }
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    try { await fetch('/api/auth/logout', { method: 'POST' }); } catch { /* cookie expires anyway */ }
     setIsLoggedIn(false);
     setAuthenticatedBranch(null);
     setIsAdmin(false);
-    setAdminToken(null);
+    setMustChange(false);
+    setShowPasswordDialog(false);
     setActiveTab('workshop');
   };
 
@@ -1118,6 +1132,10 @@ export default function OrganizerDashboard() {
   };
 
 
+  if (!sessionChecked) {
+    return <div className="py-24 text-center text-sm font-semibold text-ink" role="status">Checking your session…</div>;
+  }
+
   if (!isLoggedIn) {
     const LOGIN_BRANCHES = ['CSE', 'CSM', 'CSN', 'IT', 'ECE', 'ECV', 'EEE', 'ME', 'CE', 'I2RE', 'MBA', 'ISTE', 'TECH', 'CSI', 'CSC', 'SAC'];
     const isAdminLogin = username.trim().toLowerCase() === ADMIN_EMAIL;
@@ -1362,6 +1380,8 @@ export default function OrganizerDashboard() {
           </div>
 
           {/* Edit Current Edition Dates Button */}
+          {isAdmin ? (
+            <>
           <button
             type="button"
             onClick={() => setShowEditEditionModal(true)}
@@ -1382,6 +1402,14 @@ export default function OrganizerDashboard() {
             <Plus className="w-3.5 h-3.5" />
             <span>New Year</span>
           </button>
+
+            </>
+          ) : (
+            <span className="px-3 py-2 rounded-full bg-ink text-sm font-bold text-white border border-white/40 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-marigold-300" />
+              Dates: {editEditionDates}
+            </span>
+          )}
 
           {/* STRICT ACCESS CONTROL: Locked to Authenticated Branch */}
           {isAdmin ? (
@@ -1406,6 +1434,14 @@ export default function OrganizerDashboard() {
               <span>{selectedBranch} ({branchMeta.association})</span>
             </div>
           )}
+
+          <button
+            type="button"
+            onClick={() => setShowPasswordDialog(true)}
+            className="px-3.5 py-2 rounded-full bg-white hover:bg-lilac-100 text-sm font-bold text-ink border-2 border-ink transition-colors"
+          >
+            Change password
+          </button>
 
           <button
             type="button"
@@ -1531,14 +1567,26 @@ export default function OrganizerDashboard() {
       {/* TAB 1: FLAGSHIP WORKSHOP MANAGEMENT (EXACTLY 1 PER BRANCH) */}
       {/* ======================================================== */}
       {isAdmin && activeTab === 'poster' && (
+        <div className="space-y-6">
         <AdminPosterPanel
           year={targetEditionYear}
           posterUrl={editions.find((ed) => ed.year === targetEditionYear)?.posterUrl}
-          adminToken={adminToken}
           notify={showToast}
           onSaved={(url) =>
             setEditions((list) => list.map((ed) => (ed.year === targetEditionYear ? { ...ed, posterUrl: url } : ed)))
           }
+        />
+        <ResetPasswordsPanel
+          notify={showToast}
+          branches={['CE','ME','EEE','ECE','CSE','IT','CSN','CSM','ECV','CSC','I2RE','MBA','ISTE','TECH','CSI','SAC'].map((c) => ({ code: c, label: `${BRANCH_ORGANIZER_DEFAULTS[c]?.association || c} (${c})` }))}
+        />
+        </div>
+      )}
+      {showPasswordDialog && (
+        <ChangePasswordDialog
+          forced={mustChange}
+          notify={showToast}
+          onClose={() => { setShowPasswordDialog(false); setMustChange(false); }}
         />
       )}
 

@@ -6,20 +6,19 @@ import { Upload, Trash2, ImageIcon } from 'lucide-react';
 interface AdminPosterPanelProps {
   year: number;
   posterUrl?: string | null;
-  adminToken: string | null;
   onSaved: (url: string | null) => void;
   notify: (message: string) => void;
 }
 
 /** Admin-only: sets the main Sumshodhini poster shown right after the home-page hero. */
-export default function AdminPosterPanel({ year, posterUrl, adminToken, onSaved, notify }: AdminPosterPanelProps) {
+export default function AdminPosterPanel({ year, posterUrl, onSaved, notify }: AdminPosterPanelProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const save = async (url: string | null) => {
     const res = await fetch('/api/editions', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken || '' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ year, posterUrl: url }),
     });
     const json = await res.json();

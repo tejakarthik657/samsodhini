@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
-import { verifyAdminToken } from '@/lib/admin';
+import { requireAdmin, isResponse } from '@/lib/auth';
 
 let posterColumnReady = false;
 async function ensurePosterColumn() {
@@ -47,7 +47,9 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const guard = await requireAdmin(request);
+  if (isResponse(guard)) return guard;
   try {
     const body = await request.json();
     const { year, name, theme, dates, setActive } = body;
@@ -91,7 +93,9 @@ export async function POST(request: Request) {
 }
 
 // PATCH to allow changing dates, theme, or name dynamically anytime
-export async function PATCH(request: Request) {
+export async function PATCH(request: NextRequest) {
+  const guard = await requireAdmin(request);
+  if (isResponse(guard)) return guard;
   try {
     const body = await request.json();
     const { year, dates, theme, name, setActive, posterUrl } = body;
@@ -104,9 +108,6 @@ export async function PATCH(request: Request) {
 
     // The main poster is set by the festival admin only.
     if (posterUrl !== undefined) {
-      if (!verifyAdminToken(request.headers.get('x-admin-token'))) {
-        return NextResponse.json({ success: false, error: 'Only the festival admin can change the main poster.' }, { status: 403 });
-      }
       await ensurePosterColumn();
       const posterRes = await query(
         `UPDATE editions SET poster_url = $1 WHERE year = $2

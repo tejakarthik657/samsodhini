@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '../../../lib/db';
+import { requireBranch, isResponse } from '../../../lib/auth';
 import { BRANCH_ALIASES, BRANCH_LOOKUP } from '../../../lib/branches';
 
 export const dynamic = 'force-dynamic';
@@ -78,6 +79,9 @@ export async function PATCH(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    const guard = await requireBranch(req, branchCode);
+    if (isResponse(guard)) return guard;
 
     const code = branchCode.toUpperCase();
 

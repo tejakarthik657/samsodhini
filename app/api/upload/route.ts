@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadToGitHubStorage } from '../../../lib/githubStorage';
+import { requireSession, isResponse } from '../../../lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
+  const guard = await requireSession(req);
+  if (isResponse(guard)) return guard;
   try {
     const contentType = req.headers.get('content-type') || '';
 

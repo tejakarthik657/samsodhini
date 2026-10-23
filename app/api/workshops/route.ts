@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireBranch, requireAdmin, requireSession, isResponse } from '../../../lib/auth';
 import { query } from '../../../lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -152,6 +153,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const guard = await requireBranch(req, body.branchCode);
+    if (isResponse(guard)) return guard;
     const {
       branchCode,
       editionYear: rawEditionYear,
@@ -335,6 +338,9 @@ export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json();
     const { id, currentRegistered, liveStatus } = body;
+    const owner = await query('SELECT branch_code FROM workshops WHERE id = $1', [id]);
+    const guard = await requireBranch(req, owner.rows[0]?.branch_code);
+    if (isResponse(guard)) return guard;
 
     if (!id) {
       return NextResponse.json({ success: false, error: 'Workshop ID is required' }, { status: 400 });
@@ -384,6 +390,10 @@ export async function DELETE(req: NextRequest) {
     if (!id) {
       return NextResponse.json({ success: false, error: 'Workshop ID is required' }, { status: 400 });
     }
+
+    const owner = await query('SELECT branch_code FROM workshops WHERE id = $1', [id]);
+    const guard = await requireBranch(req, owner.rows[0]?.branch_code);
+    if (isResponse(guard)) return guard;
 
     await query('DELETE FROM workshops WHERE id = $1', [id]);
     return NextResponse.json({
