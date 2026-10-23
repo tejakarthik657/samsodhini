@@ -155,7 +155,7 @@ export default function HomePage() {
   const gridClass = 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-12';
 
   return (
-    <main className="min-h-screen flex flex-col bg-paper">
+    <main className="min-h-screen flex flex-col bg-paper w-full max-w-full overflow-x-hidden">
       <Navbar selectedYear={selectedYear} onSelectYear={setSelectedYear} editions={editions} />
 
       <HeroSection

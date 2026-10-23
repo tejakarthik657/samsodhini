@@ -48,18 +48,18 @@ export default function Countdown({ dates }: { dates?: string }) {
   ];
 
   return (
-    <div role="timer" aria-label={`Starts in ${parts[0].value} days, ${parts[1].value} hours`}>
-      <p className="text-sm font-semibold text-white/90 mb-2.5">The gates open in</p>
-      <div className="flex gap-2.5 sm:gap-3">
+    <div role="timer" aria-label={`Starts in ${parts[0].value} days, ${parts[1].value} hours`} className="w-full max-w-full">
+      <p className="text-xs sm:text-sm font-semibold text-white/90 mb-2 sm:mb-2.5">The gates open in</p>
+      <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3">
         {parts.map((p, i) => (
           <div
             key={p.label}
-            className={`min-w-[4.2rem] sm:min-w-[5rem] px-3 py-2.5 rounded-2xl bg-white border-2 border-ink shadow-pop-sm text-center ${
+            className={`flex-1 min-w-[3.6rem] sm:min-w-[5rem] px-2 sm:px-3 py-1.5 sm:py-2.5 rounded-2xl bg-white border-2 border-ink shadow-pop-sm text-center ${
               i % 2 ? 'rotate-1' : '-rotate-1'
             }`}
           >
-            <span className="block font-display text-3xl sm:text-4xl leading-none text-ink tabular-nums">{pad(p.value)}</span>
-            <span className="mt-1 block text-[0.7rem] sm:text-xs font-bold text-ink/70">{p.label}</span>
+            <span className="block font-display text-2xl sm:text-4xl leading-none text-ink tabular-nums">{pad(p.value)}</span>
+            <span className="mt-1 block text-[0.65rem] sm:text-xs font-bold text-ink/70 uppercase sm:normal-case">{p.label}</span>
           </div>
         ))}
       </div>

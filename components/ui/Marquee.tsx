@@ -17,7 +17,7 @@ export default function Marquee({ items, className = '', reverse = false, textCl
   ));
 
   return (
-    <div className={`overflow-hidden select-none ${className}`} role="img" aria-label={items.join(', ')}>
+    <div className={`overflow-hidden select-none w-full max-w-full ${className}`} role="img" aria-label={items.join(', ')}>
       <div
         className={`flex w-max gap-6 sm:gap-10 py-3 sm:py-4 ${reverse ? 'animate-marquee-rev' : 'animate-marquee'}`}
         aria-hidden="true"

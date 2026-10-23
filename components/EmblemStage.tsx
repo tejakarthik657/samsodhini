@@ -47,11 +47,14 @@ export default function EmblemStage() {
   }, []);
 
   return (
-    <div ref={stageRef} className="relative mx-auto lg:ml-auto w-[min(86vw,420px)] lg:w-[min(34.5vw,520px)] aspect-square select-none">
+    <div
+      ref={stageRef}
+      className="relative mx-auto lg:ml-auto w-[min(68vw,280px)] sm:w-[min(80vw,380px)] lg:w-[min(34.5vw,520px)] aspect-square select-none max-w-full"
+    >
       {/* Halftone dots fading outward, with a dashed orbit line */}
       <div
         aria-hidden="true"
-        className="absolute inset-[-20%] rounded-full"
+        className="absolute inset-[-14%] sm:inset-[-20%] rounded-full"
         style={{
           backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.5) 2.2px, transparent 2.8px)',
           backgroundSize: '17px 17px',
@@ -61,14 +64,14 @@ export default function EmblemStage() {
       />
       <div
         aria-hidden="true"
-        className="absolute inset-[-4%] rounded-full border-2 border-dashed border-white/45 motion-safe:animate-[spin_180s_linear_infinite_reverse]"
+        className="absolute inset-[-3%] sm:inset-[-4%] rounded-full border-2 border-dashed border-white/45 motion-safe:animate-[spin_180s_linear_infinite_reverse]"
       />
 
       {/* Floating shapes */}
-      <span aria-hidden="true" className="absolute -left-[6%] top-[8%] font-display text-5xl text-marigold-400 motion-safe:animate-[float_10s_ease-in-out_infinite]">✺</span>
-      <span aria-hidden="true" className="absolute right-[2%] top-[-2%] font-display text-6xl leading-none text-white/90 motion-safe:animate-[float_12s_ease-in-out_infinite]">+</span>
-      <span aria-hidden="true" className="absolute left-[6%] bottom-[2%] w-6 h-6 rotate-45 bg-mint-300 border-2 border-ink motion-safe:animate-[float_13s_ease-in-out_infinite]" />
-      <span aria-hidden="true" className="absolute right-[-3%] bottom-[22%] w-5 h-5 rounded-full bg-coral-400 border-2 border-ink motion-safe:animate-[float_11s_ease-in-out_infinite]" />
+      <span aria-hidden="true" className="absolute -left-[4%] sm:-left-[6%] top-[8%] font-display text-3xl sm:text-5xl text-marigold-400 motion-safe:animate-[float_10s_ease-in-out_infinite]">✺</span>
+      <span aria-hidden="true" className="absolute right-[2%] top-[-2%] font-display text-4xl sm:text-6xl leading-none text-white/90 motion-safe:animate-[float_12s_ease-in-out_infinite]">+</span>
+      <span aria-hidden="true" className="absolute left-[6%] bottom-[2%] w-4 h-4 sm:w-6 sm:h-6 rotate-45 bg-mint-300 border-2 border-ink motion-safe:animate-[float_13s_ease-in-out_infinite]" />
+      <span aria-hidden="true" className="absolute right-[-2%] sm:right-[-3%] bottom-[22%] w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-coral-400 border-2 border-ink motion-safe:animate-[float_11s_ease-in-out_infinite]" />
 
       {/* Offset discs, like misregistered print layers */}
       <div aria-hidden="true" className="absolute inset-[4%] rounded-full bg-coral-400 border-[3px] border-ink translate-x-[6%] translate-y-[5%]" />
@@ -93,7 +96,7 @@ export default function EmblemStage() {
       </div>
 
       {/* Ring of text */}
-      <svg viewBox="0 0 200 200" aria-hidden="true" className="absolute inset-[-11%] w-[122%] h-[122%] motion-safe:animate-[spin_70s_linear_infinite] pointer-events-none">
+      <svg viewBox="0 0 200 200" aria-hidden="true" className="absolute inset-[-10%] sm:inset-[-11%] w-[120%] h-[120%] sm:w-[122%] sm:h-[122%] motion-safe:animate-[spin_70s_linear_infinite] pointer-events-none">
         <defs>
           <path id="stage-ring" d="M100,100 m-90,0 a90,90 0 1,1 180,0 a90,90 0 1,1 -180,0" />
         </defs>
@@ -103,27 +106,25 @@ export default function EmblemStage() {
       </svg>
 
       {/* Orbiting stickers */}
-      <div aria-hidden="true" className="absolute inset-[-6%] motion-safe:animate-[spin_80s_linear_infinite] pointer-events-none">
+      <div aria-hidden="true" className="absolute inset-[-4%] sm:inset-[-6%] motion-safe:animate-[spin_80s_linear_infinite] pointer-events-none">
         <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
-          <span className="block motion-safe:animate-[spin_80s_linear_infinite_reverse] px-4 py-2 rounded-full bg-mint-300 border-2 border-ink shadow-pop-sm text-sm font-bold text-ink">
+          <span className="block motion-safe:animate-[spin_80s_linear_infinite_reverse] px-2.5 sm:px-4 py-1 sm:py-2 rounded-full bg-mint-300 border-2 border-ink shadow-pop-sm text-xs sm:text-sm font-bold text-ink whitespace-nowrap">
             2 days
           </span>
         </span>
-        <span className="absolute right-0 top-1/2 translate-x-1/3 -translate-y-1/2">
-          <span className="block motion-safe:animate-[spin_80s_linear_infinite_reverse] w-24 h-24 rounded-full bg-white border-2 border-ink shadow-pop-sm text-xs font-bold text-ink flex items-center justify-center text-center leading-tight p-2 -rotate-6">
+        <span className="absolute right-0 top-1/2 translate-x-1/4 sm:translate-x-1/3 -translate-y-1/2">
+          <span className="block motion-safe:animate-[spin_80s_linear_infinite_reverse] w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-white border-2 border-ink shadow-pop-sm text-[10px] sm:text-xs font-bold text-ink flex items-center justify-center text-center leading-tight p-1.5 sm:p-2 -rotate-6">
             Student
             <br />
             led
           </span>
         </span>
         <span className="absolute left-0 top-[62%] -translate-x-1/4">
-          <span className="block motion-safe:animate-[spin_80s_linear_infinite_reverse] px-4 py-2 rounded-full bg-ink border-2 border-white text-sm font-bold text-white">
+          <span className="block motion-safe:animate-[spin_80s_linear_infinite_reverse] px-2.5 sm:px-4 py-1 sm:py-2 rounded-full bg-ink border-2 border-white text-xs sm:text-sm font-bold text-white whitespace-nowrap">
             Warangal
           </span>
         </span>
       </div>
-
-
     </div>
   );
 }

@@ -106,11 +106,11 @@ export default function Navbar({ selectedYear, onSelectYear, editions: propEditi
 
   return (
     <>
-      <header className="fixed top-3 inset-x-3 sm:inset-x-6 z-50">
-        <div className={`max-w-7xl mx-auto flex items-center justify-between gap-3 bg-white border-2 border-ink rounded-full pl-2 pr-2 transition-all duration-300 ${scrolled ? 'py-1.5 shadow-pop' : 'py-2 shadow-pop-sm'}`}>
-          <div className="flex items-center gap-2 min-w-0">
-            <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Sumshodhini home">
-              <span className="w-10 h-10 rounded-full bg-white border-2 border-ink overflow-hidden flex items-center justify-center shrink-0">
+      <header className="fixed top-3 inset-x-3 sm:inset-x-6 z-50 max-w-[calc(100vw-1.5rem)] sm:max-w-7xl mx-auto">
+        <div className={`w-full flex items-center justify-between gap-2 sm:gap-3 bg-white border-2 border-ink rounded-full pl-2 pr-2 transition-all duration-300 ${scrolled ? 'py-1.5 shadow-pop' : 'py-2 shadow-pop-sm'}`}>
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <Link href="/" className="flex items-center gap-2 sm:gap-2.5 shrink-0" aria-label="Sumshodhini home">
+              <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white border-2 border-ink overflow-hidden flex items-center justify-center shrink-0">
                 <img
                   src="/Sumshodhini26icon.png"
                   alt=""
@@ -118,26 +118,26 @@ export default function Navbar({ selectedYear, onSelectYear, editions: propEditi
                   onError={(e) => { e.currentTarget.src = '/logo.png'; }}
                 />
               </span>
-              <span className="font-display text-xl sm:text-2xl leading-none text-ink">Sumshodhini</span>
+              <span className="font-display text-lg sm:text-2xl leading-none text-ink truncate">Sumshodhini</span>
             </Link>
 
-            <div className="relative" ref={dropdownRef}>
+            <div className="relative shrink-0" ref={dropdownRef}>
               <button
                 type="button"
                 onClick={() => setEditionDropdownOpen((o) => !o)}
                 aria-haspopup="listbox"
                 aria-expanded={editionDropdownOpen}
                 aria-label={`Edition ${currentYear}. Change edition`}
-                className="flex items-center gap-1 text-sm font-bold bg-marigold-400 hover:bg-marigold-300 border-2 border-ink px-2.5 py-1 rounded-full transition-colors tabular-nums"
+                className="flex items-center gap-1 text-xs sm:text-sm font-bold bg-marigold-400 hover:bg-marigold-300 border-2 border-ink px-2 sm:px-2.5 py-1 rounded-full transition-colors tabular-nums"
               >
                 <span>&apos;{yy}</span>
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${editionDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform ${editionDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {editionDropdownOpen && (
                 <div
                   role="listbox"
-                  className="absolute top-full left-0 mt-3 w-64 bg-white border-2 border-ink rounded-2xl shadow-pop p-1.5 z-50"
+                  className="absolute top-full left-0 mt-3 w-56 sm:w-64 bg-white border-2 border-ink rounded-2xl shadow-pop p-1.5 z-50"
                 >
                   <p className="px-3 py-1.5 text-xs font-semibold text-slate-500">Choose an edition</p>
                   {editionsList.length === 0 ? (
@@ -199,7 +199,7 @@ export default function Navbar({ selectedYear, onSelectYear, editions: propEditi
             <button
               type="button"
               onClick={() => setMobileMenuOpen((o) => !o)}
-              className="xl:hidden w-10 h-10 rounded-full bg-cobalt-500 text-white border-2 border-ink flex items-center justify-center"
+              className="xl:hidden w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-cobalt-500 text-white border-2 border-ink flex items-center justify-center shrink-0"
               aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={mobileMenuOpen}
             >
@@ -220,7 +220,7 @@ export default function Navbar({ selectedYear, onSelectYear, editions: propEditi
                 <Link
                   href={l.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-baseline justify-between py-4 font-display text-4xl text-white"
+                  className="flex items-baseline justify-between py-4 font-display text-3xl sm:text-4xl text-white"
                 >
                   <span>{l.label}</span>
                   <span className="text-base font-semibold text-marigold-300 tabular-nums">{String(i + 1).padStart(2, '0')}</span>

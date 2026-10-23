@@ -27,7 +27,7 @@ export default function EventCard({ event, onSelect }: EventCardProps) {
       <button
         type="button"
         onClick={() => onSelect(event)}
-        className="text-left block"
+        className="text-left block w-full"
         aria-label={`Open details for ${event.title}`}
       >
         <div className="relative aspect-[4/3] bg-cobalt-900 overflow-hidden border-b-2 border-ink">
@@ -57,9 +57,9 @@ export default function EventCard({ event, onSelect }: EventCardProps) {
           )}
         </div>
 
-        <div className="p-5 pb-3">
+        <div className="p-4 sm:p-5 pb-3">
           <p className="inline-block px-2.5 py-1 rounded-full bg-white border-2 border-ink text-xs font-bold text-ink">{event.category}</p>
-          <h3 className="mt-2 font-sans font-extrabold text-[1.65rem] text-ink leading-[1.05] tracking-tight line-clamp-3">{event.title}</h3>
+          <h3 className="mt-2 font-sans font-extrabold text-[1.45rem] sm:text-[1.65rem] text-ink leading-[1.05] tracking-tight line-clamp-3">{event.title}</h3>
           <p className="mt-2 text-sm text-ink/80 line-clamp-2 leading-snug">{event.tagline}</p>
           {lead?.name && (
             <p className="mt-3 text-sm text-ink">
@@ -73,22 +73,22 @@ export default function EventCard({ event, onSelect }: EventCardProps) {
         </div>
       </button>
 
-      <div className="mt-auto px-5 pb-5 pt-1 space-y-4">
+      <div className="mt-auto px-4 sm:px-5 pb-4 sm:pb-5 pt-1 space-y-3 sm:space-y-4">
         {hasCap && <CapacityTicks filled={event.currentRegistered} total={event.maxSlots} label="Slots taken" tone="saffron" />}
-        <div className="flex items-center justify-between gap-3">
-          <div className="leading-tight">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <div className="leading-tight shrink-0">
             <span className="block text-xs font-semibold text-ink/70">Prize pool</span>
-            <span className="font-display text-2xl text-ink">{event.prizePool?.total || 'To be announced'}</span>
+            <span className="font-display text-xl sm:text-2xl text-ink">{event.prizePool?.total || 'TBA'}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => onSelect(event)}
-              className="px-3.5 py-2 rounded-full bg-white border-2 border-ink text-sm font-bold text-ink hover:bg-lilac-100 transition-colors"
+              className="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-white border-2 border-ink text-xs sm:text-sm font-bold text-ink hover:bg-lilac-100 transition-colors"
             >
               Rules
             </button>
-            <RegisterLink url={registrationLink(event)} className="px-4 py-2 rounded-full border-2 border-ink bg-cobalt-500 hover:bg-cobalt-600 text-white text-sm font-bold text-white transition-colors" />
+            <RegisterLink url={registrationLink(event)} className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full border-2 border-ink bg-cobalt-500 hover:bg-cobalt-600 text-white text-xs sm:text-sm font-bold transition-colors" />
           </div>
         </div>
       </div>

@@ -26,7 +26,7 @@ export default function WorkshopCard({ workshop, onSelect }: WorkshopCardProps) 
       <button
         type="button"
         onClick={() => onSelect(workshop)}
-        className="text-left block"
+        className="text-left block w-full"
         aria-label={`Open details for ${workshop.title}`}
       >
         <div className="relative aspect-[4/3] bg-cobalt-900 overflow-hidden border-b-2 border-ink">
@@ -56,9 +56,8 @@ export default function WorkshopCard({ workshop, onSelect }: WorkshopCardProps) 
           )}
         </div>
 
-        <div className="p-5 pb-3">
-          
-          <h3 className="font-sans font-extrabold text-[1.65rem] text-ink leading-[1.05] tracking-tight line-clamp-3">{workshop.title}</h3>
+        <div className="p-4 sm:p-5 pb-3">
+          <h3 className="font-sans font-extrabold text-[1.45rem] sm:text-[1.65rem] text-ink leading-[1.05] tracking-tight line-clamp-3">{workshop.title}</h3>
           <p className="mt-2 text-sm text-ink/80 line-clamp-2 leading-snug">{workshop.tagline}</p>
           {workshop.resourcePerson?.name && (
             <p className="mt-3 text-sm text-ink">
@@ -72,19 +71,19 @@ export default function WorkshopCard({ workshop, onSelect }: WorkshopCardProps) 
         </div>
       </button>
 
-      <div className="mt-auto px-5 pb-5 pt-1 space-y-4">
+      <div className="mt-auto px-4 sm:px-5 pb-4 sm:pb-5 pt-1 space-y-3 sm:space-y-4">
         {hasCap && <CapacityTicks filled={workshop.currentRegistered} total={workshop.maxCapacity} label="Seats taken" tone="teal" />}
-        <div className="flex items-center justify-between gap-3">
-          <span className="font-display text-2xl text-ink">{workshop.fees || 'Free'}</span>
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <span className="font-display text-xl sm:text-2xl text-ink shrink-0">{workshop.fees || 'Free'}</span>
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => onSelect(workshop)}
-              className="px-3.5 py-2 rounded-full bg-white border-2 border-ink text-sm font-bold text-ink hover:bg-lilac-100 transition-colors"
+              className="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-white border-2 border-ink text-xs sm:text-sm font-bold text-ink hover:bg-lilac-100 transition-colors"
             >
               Details
             </button>
-            <RegisterLink url={registrationLink(workshop)} className="px-4 py-2 rounded-full border-2 border-ink bg-marigold-400 hover:bg-marigold-300 text-sm font-bold text-ink transition-colors" />
+            <RegisterLink url={registrationLink(workshop)} className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full border-2 border-ink bg-marigold-400 hover:bg-marigold-300 text-xs sm:text-sm font-bold text-ink transition-colors" />
           </div>
         </div>
       </div>

@@ -21,17 +21,18 @@ export default function RegisterLink({ url, label = 'Register', className, disab
   if (!url) {
     return (
       <span
-        className={disabledClassName || 'px-4 py-2 rounded-full border-2 border-dashed border-ink/50 text-sm font-bold text-ink/60'}
+        className={disabledClassName || 'px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border-2 border-dashed border-ink/50 text-xs sm:text-sm font-bold text-ink/60 whitespace-nowrap'}
         aria-disabled="true"
       >
-        Registration opens soon
+        <span className="inline sm:hidden">Opens soon</span>
+        <span className="hidden sm:inline">Registration opens soon</span>
       </span>
     );
   }
   return (
-    <a href={url} target="_blank" rel="noopener noreferrer" className={`${className} inline-flex items-center justify-center gap-1.5`}>
+    <a href={url} target="_blank" rel="noopener noreferrer" className={`${className} inline-flex items-center justify-center gap-1.5 whitespace-nowrap`}>
       {label}
-      <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+      <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" aria-hidden="true" />
       <span className="sr-only">(opens the registration form in a new tab)</span>
     </a>
   );
