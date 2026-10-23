@@ -1,168 +1,93 @@
 'use client';
 
 import React from 'react';
-import { 
-  Calendar, 
-  MapPin, 
-  ArrowUpRight, 
-  Users,
-  Check,
-  BookOpen
-} from 'lucide-react';
 import { Workshop } from '../types';
+import CapacityTicks from './ui/CapacityTicks';
+import RegisterLink, { registrationLink } from './ui/RegisterLink';
+
+const TONES = ['bg-white', 'bg-cobalt-100', 'bg-marigold-100', 'bg-coral-100', 'bg-mint-100'];
 
 interface WorkshopCardProps {
   workshop: Workshop;
   onSelect: (workshop: Workshop) => void;
-  onQuickRegister: (workshop: Workshop) => void;
 }
 
-export default function WorkshopCard({ workshop, onSelect, onQuickRegister }: WorkshopCardProps) {
-  const fillPercentage = Math.min(100, Math.round((workshop.currentRegistered / workshop.maxCapacity) * 100));
+export default function WorkshopCard({ workshop, onSelect }: WorkshopCardProps) {
+  const hasCap = workshop.maxCapacity > 0;
+  const full = hasCap && workshop.currentRegistered >= workshop.maxCapacity;
+  const tone = TONES[workshop.branch.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % TONES.length];
+  const tilt = [-1.2, 0.8, -0.6, 1][workshop.branch.length % 4];
 
   return (
-    <div 
-      className="group bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 hover:border-slate-300 shadow-xs hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer bento-card"
-      onClick={() => onSelect(workshop)}
+    <article
+      className={`pop group relative flex flex-col rounded-[26px] overflow-hidden ${tone}`}
+      style={{ rotate: `${tilt}deg` }}
     >
-      <div>
-        {/* Poster Header */}
-        <div className="relative aspect-[16/10] overflow-hidden bg-slate-900 flex items-center justify-center">
+      <button
+        type="button"
+        onClick={() => onSelect(workshop)}
+        className="text-left block"
+        aria-label={`Open details for ${workshop.title}`}
+      >
+        <div className="relative aspect-[4/3] bg-cobalt-900 overflow-hidden border-b-2 border-ink">
           {workshop.posterUrl ? (
-            <img 
-              src={workshop.posterUrl} 
-              alt={workshop.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            <img
+              src={workshop.posterUrl}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.06] motion-reduce:transition-none"
             />
           ) : (
-            <div className="flex flex-col items-center justify-center text-slate-400 p-6 text-center">
-              <BookOpen className="w-10 h-10 text-slate-500 mb-1" />
-              <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-bold">Day 1 Masterclass</span>
+            <div className="absolute inset-0 bg-cobalt-500 dots flex items-end p-4">
+              <span className="font-display text-7xl leading-none text-white">{workshop.branch}</span>
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/25 to-black/30" />
-
-          {/* Badges on Top */}
-          <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              {workshop.branchLogo && (
-                <div className="w-6 h-6 rounded-full overflow-hidden bg-white p-0.5 shadow-xs border border-white/70 shrink-0">
-                  <img src={workshop.branchLogo} alt={workshop.branch} className="w-full h-full object-contain" />
-                </div>
-              )}
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-black bg-white text-slate-900 shadow-xs">
-                {workshop.branch}
+          <span className="absolute top-3 left-3 flex items-center gap-2 -rotate-3">
+            {workshop.branchLogo && (
+              <span className="w-9 h-9 rounded-full bg-white border-2 border-ink p-1 flex items-center justify-center">
+                <img src={workshop.branchLogo} alt="" className="w-full h-full object-contain" />
               </span>
-            </div>
-
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-900/80 backdrop-blur-md text-blue-100 border border-blue-400/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-              <span>Day 1 Flagship</span>
+            )}
+            <span className="px-3 py-1 rounded-full bg-white border-2 border-ink text-sm font-bold text-ink shadow-pop-sm">{workshop.branch}</span>
+          </span>
+          {full && (
+            <span className="absolute top-3 right-3 rotate-6 px-3 py-1 rounded-full bg-coral-500 border-2 border-ink text-sm font-bold text-white shadow-pop-sm">
+              Full
             </span>
-          </div>
-
-          {/* Bottom Telemetry */}
-          <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white text-xs">
-            <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full font-semibold text-[11px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              <span><strong>{workshop.currentRegistered}</strong> / {workshop.maxCapacity} Enrolled</span>
-            </div>
-
-            <span className="font-bold text-white bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px]">
-              {workshop.fees}
-            </span>
-          </div>
-        </div>
-
-        {/* Body */}
-        <div className="p-4 sm:p-5 space-y-3 sm:space-y-3.5">
-          <div>
-            <h3 className="text-base font-black text-slate-900 group-hover:text-blue-900 transition-colors line-clamp-2 leading-snug">
-              {workshop.title}
-            </h3>
-            <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed font-normal">
-              {workshop.tagline}
-            </p>
-          </div>
-
-          {/* Keynote Speaker Info */}
-          {workshop.resourcePerson && (
-            <div className="flex items-center gap-2.5 p-2.5 rounded-2xl bg-slate-50 border border-slate-100">
-              {workshop.resourcePerson.avatar ? (
-                <img 
-                  src={workshop.resourcePerson.avatar} 
-                  alt={workshop.resourcePerson.name}
-                  className="w-8 h-8 rounded-full object-cover border border-slate-200 shrink-0"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0">
-                  {(workshop.resourcePerson.name || 'S')[0]}
-                </div>
-              )}
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-900 truncate">
-                  {workshop.resourcePerson.name}
-                </p>
-                <p className="text-[11px] text-slate-500 truncate font-medium">
-                  {workshop.resourcePerson.company || 'Industry Specialist'}
-                </p>
-              </div>
-            </div>
           )}
+        </div>
 
-          {/* Logistics */}
-          <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-500 font-medium">
-            <div className="flex items-center gap-1.5 truncate">
-              <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-              <span className="truncate">{workshop.dates}</span>
-            </div>
-            <div className="flex items-center gap-1.5 truncate">
-              <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-              <span className="truncate" title={workshop.venue}>{workshop.venue ? workshop.venue.split('(')[0] : 'Campus Lab'}</span>
-            </div>
-          </div>
+        <div className="p-5 pb-3">
+          
+          <h3 className="font-sans font-extrabold text-[1.65rem] text-ink leading-[1.05] tracking-tight line-clamp-3">{workshop.title}</h3>
+          <p className="mt-2 text-sm text-ink/80 line-clamp-2 leading-snug">{workshop.tagline}</p>
+          {workshop.resourcePerson?.name && (
+            <p className="mt-3 text-sm text-ink">
+              <span className="font-bold">{workshop.resourcePerson.name}</span>
+              {workshop.resourcePerson.company ? <span className="text-ink/70">, {workshop.resourcePerson.company}</span> : null}
+            </p>
+          )}
+          <p className="mt-1 text-sm text-ink/70">
+            {[workshop.dates, workshop.venue ? workshop.venue.split('(')[0].trim() : null].filter(Boolean).join(' · ')}
+          </p>
+        </div>
+      </button>
 
-          {/* Capacity Progress */}
-          <div className="space-y-1 pt-1">
-            <div className="flex justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-              <span>Capacity</span>
-              <span>{fillPercentage}%</span>
-            </div>
-            <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-slate-900 rounded-full transition-all duration-500"
-                style={{ width: `${fillPercentage}%` }}
-              />
-            </div>
+      <div className="mt-auto px-5 pb-5 pt-1 space-y-4">
+        {hasCap && <CapacityTicks filled={workshop.currentRegistered} total={workshop.maxCapacity} label="Seats taken" tone="teal" />}
+        <div className="flex items-center justify-between gap-3">
+          <span className="font-display text-2xl text-ink">{workshop.fees || 'Free'}</span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onSelect(workshop)}
+              className="px-3.5 py-2 rounded-full bg-white border-2 border-ink text-sm font-bold text-ink hover:bg-lilac-100 transition-colors"
+            >
+              Details
+            </button>
+            <RegisterLink url={registrationLink(workshop)} className="px-4 py-2 rounded-full border-2 border-ink bg-marigold-400 hover:bg-marigold-300 text-sm font-bold text-ink transition-colors" />
           </div>
         </div>
       </div>
-
-      {/* Footer Actions */}
-      <div className="p-4 sm:p-5 pt-0 grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelect(workshop);
-          }}
-          className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-colors flex items-center justify-center gap-1"
-        >
-          <span>View Dossier</span>
-          <ArrowUpRight className="w-3.5 h-3.5 text-slate-500" />
-        </button>
-
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onQuickRegister(workshop);
-          }}
-          className="py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition-colors"
-        >
-          <span>Register Pass</span>
-        </button>
-      </div>
-    </div>
+    </article>
   );
 }

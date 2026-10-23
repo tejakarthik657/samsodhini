@@ -9,8 +9,10 @@ import EventCard from '../components/EventCard';
 import ScheduleTimeline from '../components/ScheduleTimeline';
 import LegacyVault from '../components/LegacyVault';
 import NetflixDetailModal from '../components/NetflixDetailModal';
-import RegistrationModal from '../components/RegistrationModal';
+import { canonicalBranchCode } from '../lib/branches';
 import Footer from '../components/Footer';
+import SectionHeader from '../components/ui/SectionHeader';
+import EmptyState from '../components/ui/EmptyState';
 import { 
   Workshop, 
   FestEvent,
@@ -19,20 +21,7 @@ import {
   StudentBodyPoster
 } from '../types';
 
-import { 
-  BookOpen, 
-  Trophy, 
-  ShieldCheck,
-  Archive,
-  Camera,
-  ArrowRight,
-  Award,
-  Users,
-  Maximize2,
-  X,
-  ExternalLink,
-  Download
-} from 'lucide-react';
+import { X, ExternalLink, Maximize2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HomePage() {
@@ -54,7 +43,6 @@ export default function HomePage() {
 
   // Modals state
   const [inspectItem, setInspectItem] = useState<Workshop | FestEvent | null>(null);
-  const [registerItem, setRegisterItem] = useState<Workshop | FestEvent | null>(null);
 
   // Fetch initial editions
   useEffect(() => {
@@ -125,7 +113,7 @@ export default function HomePage() {
 
   // Filter Workshops
   const filteredWorkshops = workshops.filter((ws) => {
-    const matchesBranch = selectedBranch === 'ALL' || ws.branch === selectedBranch;
+    const matchesBranch = selectedBranch === 'ALL' || canonicalBranchCode(ws.branch) === selectedBranch;
     const matchesSearch =
       searchQuery.trim() === '' ||
       ws.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -138,7 +126,7 @@ export default function HomePage() {
 
   // Filter Events
   const filteredEvents = events.filter((ev) => {
-    const matchesBranch = selectedBranch === 'ALL' || ev.branch === selectedBranch;
+    const matchesBranch = selectedBranch === 'ALL' || canonicalBranchCode(ev.branch) === selectedBranch;
     const matchesSearch =
       searchQuery.trim() === '' ||
       ev.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -155,18 +143,21 @@ export default function HomePage() {
   });
 
   const activeEditionObj = editions.find(e => e.year === selectedYear);
-  const isArchived = activeEditionObj ? !activeEditionObj.isActive : false;
+  const yy = String(selectedYear).slice(-2);
+
+  const resetFilters = () => {
+    setSelectedBranch('ALL');
+    setSearchQuery('');
+  };
+
+  const filtered = searchQuery || selectedBranch !== 'ALL';
+  const wrap = 'max-w-[1500px] mx-auto px-4 sm:px-8 w-full';
+  const gridClass = 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-12';
 
   return (
-    <main className="min-h-screen flex flex-col bg-[#FAF9F5]">
-      {/* Navigation */}
-      <Navbar 
-        selectedYear={selectedYear}
-        onSelectYear={setSelectedYear}
-        editions={editions}
-      />
+    <main className="min-h-screen flex flex-col bg-paper">
+      <Navbar selectedYear={selectedYear} onSelectYear={setSelectedYear} editions={editions} />
 
-      {/* Hero Header with Dynamic Edition Architecture & Filters */}
       <HeroSection
         selectedBranch={selectedBranch}
         onSelectBranch={setSelectedBranch}
@@ -181,560 +172,347 @@ export default function HomePage() {
         onSelectYear={setSelectedYear}
       />
 
-      {/* SECTION 1: DAY 1 — FLAGSHIP ACADEMIC WORKSHOPS */}
+      {/* Day 1 */}
       {(selectedCategory === 'all' || selectedCategory === 'workshops') && (
-        <section id="workshops" className="py-14 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-            <div>
-              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-800 border border-blue-200">
-                  DAY 1 EXCLUSIVE • 1 PER BRANCH
-                </span>
-                <span className="text-xs font-bold text-slate-500">
-                  Curated by Senior Student Conveners & Faculty Advisors
-                </span>
-              </div>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 mt-1.5 tracking-tight">
-                Day 1: Flagship Masterclass Workshops
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl font-normal leading-relaxed">
-                Exactly one authoritative technical workshop per department. Led by external industry specialists and senior student conveners with full laboratory access and ISTE accredited credentials.
-              </p>
-            </div>
+        <section id="workshops" className="bg-paper py-20 sm:py-28">
+          <div className={wrap}>
+            <SectionHeader
+              day="1"
+              title="Workshops"
+              description="A hands-on workshop from each department, with faculty and student coordinators to contact for every one."
+              count={filteredWorkshops.length}
+              countLabel={filteredWorkshops.length === 1 ? 'workshop' : 'workshops'}
+            />
 
-            <Link
-              href="/organizer"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-slate-950 self-start md:self-auto bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-xs transition-colors"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-slate-500" />
-              <span>Organizer Portal</span>
-            </Link>
+            {loading ? (
+              <ListingSkeleton />
+            ) : filteredWorkshops.length === 0 ? (
+              <EmptyState
+                title={filtered ? 'No workshops match your filters' : `No workshops published for '${yy} yet`}
+                body={
+                  filtered
+                    ? 'Clear the search or choose another branch to see more.'
+                    : 'Departments publish their workshop from the organizer portal. It will appear here as soon as it is live.'
+                }
+                primary={filtered ? { label: 'Clear filters', onClick: resetFilters } : { label: 'Publish a workshop', href: '/organizer' }}
+              />
+            ) : (
+              <div className={gridClass}>
+                {filteredWorkshops.map((workshop) => (
+                  <WorkshopCard
+                    key={workshop.id}
+                    workshop={workshop}
+                    onSelect={(ws) => setInspectItem(ws)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-
-          {filteredWorkshops.length === 0 ? (
-            <div className="p-12 text-center bg-white rounded-3xl border border-slate-200/90 shadow-xs">
-              <BookOpen className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <h4 className="text-sm font-bold text-slate-900">
-                {searchQuery 
-                  ? `No workshops found matching "${searchQuery}" for department ${selectedBranch}.`
-                  : `No Day 1 Workshops currently active for ${selectedBranch} in Edition ${selectedYear}.`}
-              </h4>
-              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-                Department associations (ACE, AIMS, DATA, ITA, ECLAT, ELECTRA, MESA, CEA, and sister clubs) can publish and manage their flagship masterclass directly from the Organizer Portal.
-              </p>
-              <div className="mt-4 flex justify-center gap-2">
-                {searchQuery && (
-                  <button
-                    onClick={() => {
-                      setSelectedBranch('ALL');
-                      setSearchQuery('');
-                    }}
-                    className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-xs"
-                  >
-                    Reset Filters
-                  </button>
-                )}
-                <Link
-                  href="/organizer"
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-colors"
-                >
-                  Publish Workshop as Organizer
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredWorkshops.map((workshop) => (
-                <WorkshopCard
-                  key={workshop.id}
-                  workshop={workshop}
-                  onSelect={(ws) => setInspectItem(ws)}
-                  onQuickRegister={(ws) => setRegisterItem(ws)}
-                />
-              ))}
-            </div>
-          )}
         </section>
       )}
 
-      {/* SECTION 2: DAY 2 — NATIONAL TECHNICAL COMPETITIONS & ARENA */}
+      {/* Day 2 */}
       {(selectedCategory === 'all' || selectedCategory === 'events') && (
-        <section id="events" className="py-14 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full border-t border-slate-200/80">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-            <div>
-              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-purple-50 text-purple-800 border border-purple-200">
-                  DAY 2 ARENA • MULTIPLE CONTESTS
-                </span>
-                <span className="text-xs font-bold text-slate-500">
-                  Coordinated by Branch Technical Leads & Event In-Charges
-                </span>
-              </div>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 mt-1.5 tracking-tight">
-                Day 2: National Technical Competitions
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl font-normal leading-relaxed">
-                High-intensity competitive arenas: 24-hour hackathons, algorithmic speed sprints, combat robotics, hardware circuit debugging, CAD structural design, paper presentations, and project expos.
-              </p>
-            </div>
+        <section id="events" className="bg-marigold-400 border-y-2 border-ink py-20 sm:py-28 relative overflow-hidden grain">
+          <div className="absolute inset-0 dots-ink" aria-hidden="true" />
+          <div className={`${wrap} relative`}>
+            <SectionHeader
+              day="2"
+              title="Competitions"
+              description="Hackathons, speed coding, combat robotics, circuit debugging and project expos, with cash prizes for the winning teams."
+              count={filteredEvents.length}
+              countLabel={filteredEvents.length === 1 ? 'competition' : 'competitions'}
+            />
 
-            <Link
-              href="/organizer"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-slate-950 self-start md:self-auto bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-xs transition-colors"
-            >
-              <Trophy className="w-3.5 h-3.5 text-purple-600" />
-              <span>Add New Competition</span>
-            </Link>
+            {loading ? (
+              <ListingSkeleton />
+            ) : filteredEvents.length === 0 ? (
+              <EmptyState
+                title={filtered ? 'No competitions match your filters' : `No competitions published for '${yy} yet`}
+                body={
+                  filtered
+                    ? 'Clear the search or choose another branch to see more.'
+                    : 'Departments can add as many competitions as they like from the organizer portal.'
+                }
+                primary={filtered ? { label: 'Clear filters', onClick: resetFilters } : { label: 'Add a competition', href: '/organizer' }}
+              />
+            ) : (
+              <div className={gridClass}>
+                {filteredEvents.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    onSelect={(ev) => setInspectItem(ev)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-
-          {filteredEvents.length === 0 ? (
-            <div className="p-12 text-center bg-white rounded-3xl border border-slate-200/90 shadow-xs">
-              <Trophy className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <h4 className="text-sm font-bold text-slate-900">
-                {searchQuery
-                  ? `No technical competitions found matching "${searchQuery}" for department ${selectedBranch}.`
-                  : `No Day 2 Competitions currently published for ${selectedBranch} in Edition ${selectedYear}.`}
-              </h4>
-              <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-                Department associations can register and manage as many technical competitions, hackathons, and challenge arenas as needed via the Organizer Portal.
-              </p>
-              <div className="mt-4 flex justify-center gap-2">
-                {searchQuery && (
-                  <button
-                    onClick={() => {
-                      setSelectedBranch('ALL');
-                      setSearchQuery('');
-                    }}
-                    className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-xs"
-                  >
-                    Reset Filters
-                  </button>
-                )}
-                <Link
-                  href="/organizer"
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-colors"
-                >
-                  Create Competition
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredEvents.map((event) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  onSelect={(ev) => setInspectItem(ev)}
-                  onQuickRegister={(ev) => setRegisterItem(ev)}
-                />
-              ))}
-            </div>
-          )}
         </section>
       )}
 
-      {/* SECTION 3: THE CONCEPTUAL BLUEPRINT & 5 DIMENSIONS */}
       <SumshodhiniPhilosophy />
 
-      {/* SECTION 4: OFFICIAL 2-DAY FEST ITINERARY (DYNAMICALLY LINKED TO EDITION) */}
-      <section id="schedule" className="py-14 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full border-t border-slate-200/80">
-        <div className="text-center max-w-2xl mx-auto mb-8 space-y-2">
-          <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
-            DYNAMIC SYMPOSIUM ITINERARY
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
-            Official 2-Day Schedule & Venue Directory
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed">
-            Synchronized directly with registered laboratory hubs and academic schedules for Edition {selectedYear}.
-          </p>
+      {/* Schedule */}
+      <section id="schedule" className="bg-paper py-20 sm:py-28">
+        <div className={wrap}>
+          <SectionHeader
+            title="Schedule"
+            description={`Times and venues for both days of the '${yy} edition, pulled from what each department has published.`}
+          />
+          <ScheduleTimeline editionYear={selectedYear} />
         </div>
-        <ScheduleTimeline editionYear={selectedYear} />
       </section>
 
-      {/* SECTION 5: STUDENT ASSOCIATION EXECUTIVE BODIES */}
-      <section id="student-body" className="py-14 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full border-t border-slate-200/80">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-          <div>
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200">
-                STUDENT LEADERSHIP & COUNCILS
-              </span>
-              <span className="text-xs font-bold text-slate-500">
-                18 Department Student Associations
-              </span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 mt-1.5 tracking-tight">
-              Student Body Executive Committees
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl font-normal leading-relaxed">
-              Official executive bodies, faculty advisors, student presidents, and departmental association posters leading Sumshodhini &apos;{String(selectedYear).slice(-2)}.
-            </p>
-          </div>
-
-          <Link
-            href="/organizer"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-slate-950 self-start md:self-auto bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-xs transition-colors hover:bg-slate-50"
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-slate-600" />
-            <span>Upload Body Poster</span>
-          </Link>
-        </div>
-
-        {/* Filter Pills for Department Associations */}
-        {studentBodyPosters.length > 0 && (
-          <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 text-xs scrollbar-none">
-            <button
-              onClick={() => setStudentBodyFilter('ALL')}
-              className={`px-3.5 py-1.5 rounded-full font-bold whitespace-nowrap transition-colors ${
-                studentBodyFilter === 'ALL'
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              All Departments ({studentBodyPosters.length})
-            </button>
-            {studentBodyPosters.map((p) => (
-              <button
-                key={p.branchCode}
-                onClick={() => setStudentBodyFilter(p.branchCode)}
-                className={`px-3 py-1.5 rounded-full font-bold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
-                  studentBodyFilter === p.branchCode
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                {p.logoUrl && (
-                  <img src={p.logoUrl} alt={p.branchCode} className="w-3.5 h-3.5 rounded-full object-contain" />
-                )}
-                <span>{p.branchCode}</span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {filteredStudentBodyPosters.length === 0 ? (
-          <div className="p-12 text-center bg-white rounded-3xl border border-slate-200/90 shadow-xs space-y-3">
-            <Award className="w-12 h-12 text-slate-300 mx-auto" />
-            <h4 className="text-base font-bold text-slate-800">
-              Student Body Executive Directory
-            </h4>
-            <p className="text-xs text-slate-500 max-w-md mx-auto">
-              Department associations are finalizing their official executive committee rosters for Edition {selectedYear}. Student conveners can upload association posters directly from the Organizer Portal.
-            </p>
-            <div className="pt-2">
-              <Link
-                href="/organizer"
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-xs hover:bg-slate-800 transition-colors inline-block"
-              >
-                Upload Executive Poster
+      {/* Student bodies */}
+      <section id="student-body" className="bg-lilac-200 border-y-2 border-ink py-20 sm:py-28 relative overflow-hidden">
+        <div className="absolute inset-0 dots-ink" aria-hidden="true" />
+        <div className={`${wrap} relative`}>
+          <SectionHeader
+            title="Student bodies"
+            description={`The department associations organising Sumshodhini '${yy}, with their faculty advisors and student presidents.`}
+            action={
+              <Link href="/organizer" className="pop inline-flex items-center px-5 py-2.5 rounded-full bg-white text-ink text-sm font-bold">
+                Upload a poster
               </Link>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredStudentBodyPosters.map((item) => (
-              <div
-                key={item.branchCode}
-                className="group bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col"
-              >
-                {/* Poster Display Area */}
-                <div 
-                  onClick={() => item.posterUrl && setActivePosterModal(item)}
-                  className={`relative aspect-[4/5] bg-slate-950 overflow-hidden flex items-center justify-center ${
-                    item.posterUrl ? 'cursor-pointer' : ''
+            }
+          />
+
+          {studentBodyPosters.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-10" role="group" aria-label="Filter student bodies">
+              {['ALL', ...studentBodyPosters.map((p) => p.branchCode)].map((code) => {
+                const label = studentBodyPosters.find((p) => p.branchCode === code)?.associationShort || code;
+                return (
+                <button
+                  key={code}
+                  onClick={() => setStudentBodyFilter(code)}
+                  aria-pressed={studentBodyFilter === code}
+                  className={`px-4 py-2 rounded-full border-2 border-ink text-sm font-bold transition-colors ${
+                    studentBodyFilter === code ? 'bg-ink text-white' : 'bg-white text-ink hover:bg-marigold-200'
                   }`}
                 >
-                  {item.posterUrl ? (
-                    <>
-                      <img
-                        src={item.posterUrl}
-                        alt={`${item.branchCode} Student Body Poster`}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-transparent to-transparent flex flex-col justify-end p-5">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          {item.logoUrl ? (
-                            <img src={item.logoUrl} alt={item.branchCode} className="w-8 h-8 rounded-full bg-white p-1 object-contain shadow-xs" />
-                          ) : (
-                            <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] font-black">
-                              {item.branchCode}
-                            </div>
-                          )}
-                          <div>
-                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-white/90">
-                              {item.branchCode} · {item.associationShort || item.branchCode}
-                            </span>
-                            <h4 className="text-white text-sm font-black line-clamp-1">
-                              {item.title || `${item.branchCode} Student Body`}
-                            </h4>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 hover:bg-white text-slate-900 rounded-full p-2 shadow-md">
-                        <Maximize2 className="w-4 h-4" />
-                      </div>
-                    </>
-                  ) : (
-                    <div className="p-8 text-center space-y-3 text-slate-400">
-                      <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-slate-500">
-                        {item.logoUrl ? (
-                          <img src={item.logoUrl} alt={item.branchCode} className="w-9 h-9 rounded-full object-contain" />
-                        ) : (
-                          <Award className="w-7 h-7 text-amber-500" />
+                  {code === 'ALL' ? `All ${studentBodyPosters.length}` : label}
+                </button>
+                );
+              })}
+            </div>
+          )}
+
+          {filteredStudentBodyPosters.length === 0 ? (
+            <EmptyState
+              title="Executive committees are being finalised"
+              body={`Associations will publish their '${yy} executive poster here. Conveners can upload one from the organizer portal.`}
+              primary={{ label: 'Upload a poster', href: '/organizer' }}
+            />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredStudentBodyPosters.map((item, idx) => {
+                const colors = ['bg-white', 'bg-cobalt-500 text-white', 'bg-marigold-400', 'bg-coral-400', 'bg-mint-300'];
+                const tile = colors[idx % colors.length];
+                return (
+                  <article key={item.branchCode} className={`pop group flex flex-col rounded-[26px] overflow-hidden ${tile}`}>
+                    <button
+                      type="button"
+                      disabled={!item.posterUrl}
+                      onClick={() => item.posterUrl && setActivePosterModal(item)}
+                      className={`relative block w-full text-left disabled:cursor-default border-b-2 border-ink overflow-hidden ${item.posterUrl ? 'aspect-[4/5]' : 'aspect-[16/10]'}`}
+                      aria-label={item.posterUrl ? `View ${item.branchCode} poster full size` : undefined}
+                    >
+                      {item.posterUrl ? (
+                        <>
+                          <img
+                            src={item.posterUrl}
+                            alt={`${item.branchCode} student body poster`}
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.05] motion-reduce:transition-none"
+                          />
+                          <span className="absolute top-3 right-3 bg-white text-ink border-2 border-ink rounded-full p-2">
+                            <Maximize2 className="w-4 h-4" />
+                          </span>
+                        </>
+                      ) : (
+                        <span className="absolute inset-0 flex items-end p-4">
+                          <span className="font-display text-5xl sm:text-6xl leading-[0.8]">{item.associationShort || item.branchCode}</span>
+                        </span>
+                      )}
+                    </button>
+
+                    <div className="p-5 flex-1 flex flex-col gap-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <h3 className="font-display text-2xl leading-[0.98]">{item.branchName || item.branchCode}</h3>
+                        {item.associationShort && (
+                          <span className="shrink-0 px-2.5 py-1 rounded-full bg-ink text-white text-xs font-bold">{item.associationShort}</span>
                         )}
                       </div>
-                      <div>
-                        <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300 text-[10px] font-bold">
-                          {item.branchCode} · {item.associationShort || item.branchCode}
-                        </span>
-                        <p className="text-xs font-bold text-slate-200 mt-2">
-                          {item.title || `${item.branchCode} Student Executive Body`}
-                        </p>
-                        <p className="text-[11px] text-slate-400 mt-1 max-w-xs mx-auto">
-                          Official executive body poster will be unveiled shortly by {item.associationShort || item.branchCode} conveners.
-                        </p>
-                      </div>
+                      {item.description && <p className="text-sm leading-snug line-clamp-2 opacity-90">{item.description}</p>}
+                      <dl className="mt-auto pt-3 border-t-2 border-current/30 text-sm">
+                        <div className="flex justify-between gap-3">
+                          <dt className="opacity-70">Faculty advisor</dt>
+                          <dd className="font-bold text-right truncate">{item.facultyAdvisor || 'Department faculty'}</dd>
+                        </div>
+                        <div className="flex justify-between gap-3 mt-1">
+                          <dt className="opacity-70">Student president</dt>
+                          <dd className="font-bold text-right truncate">{item.studentPresident || 'To be announced'}</dd>
+                        </div>
+                      </dl>
                     </div>
-                  )}
-                </div>
-
-                {/* Card Content Footer */}
-                <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3 bg-white">
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[11px] font-black uppercase tracking-wider text-slate-900">
-                        {item.branchName || item.branchCode}
-                      </span>
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">
-                        {item.associationShort}
-                      </span>
-                    </div>
-
-                    {item.description && (
-                      <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                        {item.description}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Leadership details */}
-                  <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-2 text-[11px]">
-                    <div>
-                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Faculty Advisor</span>
-                      <span className="font-semibold text-slate-800 truncate block">
-                        {item.facultyAdvisor || 'Department HoD & Faculty'}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Student President</span>
-                      <span className="font-semibold text-slate-800 truncate block">
-                        {item.studentPresident || 'Convener Board'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {item.posterUrl && (
-                    <button
-                      onClick={() => setActivePosterModal(item)}
-                      className="w-full mt-2 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
-                    >
-                      <Maximize2 className="w-3.5 h-3.5" />
-                      <span>View Full Resolution Poster</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* SECTION 6: VISUAL ARCHIVE & RECENT MOMENTS */}
-      <section id="gallery" className="py-14 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full border-t border-slate-200/80">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-          <div>
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-800 border border-blue-200">
-                OFFICIAL MOMENTS & DOCUMENTATION
-              </span>
-              <span className="text-xs font-bold text-slate-500">
-                Uploaded by Department Conveners
-              </span>
+                  </article>
+                );
+              })}
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-950 mt-1.5 tracking-tight">
-              Symposium Visual Gallery
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl font-normal leading-relaxed">
-              High-resolution captures from workshops, robotics challenges, code sprints, and valedictory awards across all 18 departments and collegiate chapters.
-            </p>
-          </div>
-
-          <Link
-            href="/gallery"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-slate-950 self-start md:self-auto bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-xs transition-colors hover:bg-slate-50"
-          >
-            <Camera className="w-3.5 h-3.5 text-blue-600" />
-            <span>Explore Full Gallery ({galleryPhotos.length} photos)</span>
-            <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-          </Link>
+          )}
         </div>
-
-        {galleryPhotos.length === 0 ? (
-          <div className="p-10 text-center bg-white rounded-3xl border border-slate-200/90 shadow-xs space-y-2">
-            <Camera className="w-10 h-10 text-slate-300 mx-auto" />
-            <h4 className="text-sm font-bold text-slate-800">Visual Gallery Live Hub</h4>
-            <p className="text-xs text-slate-500 max-w-md mx-auto">
-              Event conveners upload high-resolution photos after workshop and competition rounds conclude.
-            </p>
-            <div className="pt-2">
-              <Link
-                href="/organizer"
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-xs hover:bg-slate-800 transition-colors inline-block"
-              >
-                Upload Activity Photos
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {galleryPhotos.slice(0, 8).map((photo) => (
-              <Link
-                key={photo.id}
-                href="/gallery"
-                className="group rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col"
-              >
-                <div className="relative aspect-[4/3] bg-slate-950 overflow-hidden">
-                  <img
-                    src={photo.imageUrl}
-                    alt={photo.caption || photo.itemTitle}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute top-2 left-2 flex items-center gap-1">
-                    <span className="px-2 py-0.5 rounded-md text-[9px] font-black bg-slate-900/90 text-white shadow-2xs">
-                      {photo.branchCode}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-md text-[9px] font-semibold bg-white/90 text-slate-800 shadow-2xs">
-                      {photo.itemType === 'workshop' ? 'Workshop' : 'Event'}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-2.5 space-y-0.5">
-                  <h5 className="text-[11px] font-bold text-slate-900 truncate">
-                    {photo.itemTitle}
-                  </h5>
-                  {photo.caption && (
-                    <p className="text-[10px] text-slate-500 line-clamp-1">
-                      {photo.caption}
-                    </p>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
       </section>
 
-      {/* SECTION 6: 50-YEAR INSTITUTIONAL HERITAGE VAULT */}
+      {/* Gallery */}
+      <section id="gallery" className="bg-cobalt-500 text-white py-20 sm:py-28 relative overflow-hidden grain">
+        <div className="absolute inset-0 dots" aria-hidden="true" />
+        <div className={`${wrap} relative`}>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 sm:mb-14">
+            <div>
+              <h2 className="font-display uppercase text-4xl sm:text-6xl lg:text-7xl leading-[0.95] text-marigold-400">Gallery</h2>
+              <p className="mt-4 text-base sm:text-lg text-white/90 max-w-xl leading-snug">
+                Photographs from workshops, robotics arenas, code sprints and the valedictory, uploaded by department conveners.
+              </p>
+            </div>
+            <Link
+              href="/gallery"
+              className="pop self-start md:self-auto inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-marigold-400 text-ink text-base font-bold"
+            >
+              Open full gallery{galleryPhotos.length > 0 ? ` (${galleryPhotos.length})` : ''}
+            </Link>
+          </div>
+
+          {galleryPhotos.length === 0 ? (
+            <div className="rounded-[28px] border-2 border-dashed border-white/60 px-6 py-16 text-center">
+              <h3 className="font-display text-3xl sm:text-5xl leading-[0.95]">No photos yet</h3>
+              <p className="mt-3 text-base text-white/85 max-w-md mx-auto leading-snug">
+                Conveners add photographs once a workshop or competition round wraps up.
+              </p>
+              <Link href="/organizer" className="pop mt-7 inline-flex items-center px-5 py-3 rounded-full bg-white text-ink text-sm font-bold">
+                Upload photos
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-7">
+              {galleryPhotos.slice(0, 8).map((photo, i) => (
+                <Link
+                  key={photo.id}
+                  href="/gallery"
+                  style={{ rotate: `${[-2.5, 1.8, -1, 2.4, -1.8, 1.2, -2.2, 1.6][i % 8]}deg` }}
+                  className="group bg-white p-2.5 pb-3 border-2 border-ink rounded-xl shadow-pop transition-transform duration-200 hover:!rotate-0 hover:scale-[1.03]"
+                >
+                  <span className="block aspect-[4/3] overflow-hidden rounded-md bg-cobalt-900">
+                    <img src={photo.imageUrl} alt={photo.caption || photo.itemTitle} className="w-full h-full object-cover" />
+                  </span>
+                  <span className="mt-2 flex items-center justify-between gap-2 text-ink">
+                    <span className="text-sm font-bold truncate">{photo.itemTitle}</span>
+                    <span className="shrink-0 text-xs font-bold px-2 py-0.5 rounded-full bg-marigold-300 border-2 border-ink">{photo.branchCode}</span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       <div id="heritage">
         <LegacyVault />
       </div>
 
-      {/* NETFLIX-STYLE POSTER INSPECTION MODAL */}
       <NetflixDetailModal
         item={inspectItem}
         onClose={() => setInspectItem(null)}
-        onRegisterClick={(item) => {
-          setInspectItem(null);
-          setRegisterItem(item);
-        }}
       />
 
-      {/* REGISTRATION & DIGITAL PASS MODAL */}
-      <RegistrationModal
-        item={registerItem}
-        onClose={() => setRegisterItem(null)}
-      />
 
-      {/* FULL RESOLUTION STUDENT BODY POSTER LIGHTBOX MODAL */}
+      {/* Poster lightbox */}
       {activePosterModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative max-w-4xl w-full max-h-[92vh] bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col">
-            {/* Modal Top Bar */}
-            <div className="p-3.5 sm:p-4 px-4 sm:px-6 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-white">
-              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 pr-2">
-                {activePosterModal.logoUrl && (
-                  <img src={activePosterModal.logoUrl} alt={activePosterModal.branchCode} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white p-1 object-contain shrink-0" />
-                )}
-                <div className="min-w-0">
-                  <h3 className="text-xs sm:text-base font-black text-white truncate">
-                    {activePosterModal.title || `${activePosterModal.branchCode} Student Body Poster`}
-                  </h3>
-                  <p className="text-[10px] sm:text-[11px] text-slate-400 truncate">
-                    {activePosterModal.branchName} · {activePosterModal.associationShort} · Edition {selectedYear}
-                  </p>
-                </div>
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 bg-ink/85 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label={activePosterModal.title || `${activePosterModal.branchCode} poster`}
+          onClick={() => setActivePosterModal(null)}
+        >
+          <div
+            className="relative max-w-4xl w-full max-h-[92vh] bg-white border-2 border-ink rounded-[26px] shadow-pop-lg overflow-hidden flex flex-col animate-scale-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-5 sm:px-7 py-4 border-b-2 border-ink bg-marigold-400 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="font-display text-2xl sm:text-3xl truncate text-ink">
+                  {activePosterModal.title || `${activePosterModal.branchCode} student body`}
+                </h3>
+                <p className="text-sm font-semibold text-ink/80 truncate">
+                  {activePosterModal.branchName} · {activePosterModal.associationShort} · &apos;{yy}
+                </p>
               </div>
-
-              <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+              <div className="flex items-center gap-2 shrink-0">
                 <a
                   href={activePosterModal.posterUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-1.5 sm:p-2 rounded-full hover:bg-slate-800 text-slate-300 hover:text-white transition-colors"
-                  title="Open original image"
+                  className="w-10 h-10 rounded-full bg-white border-2 border-ink flex items-center justify-center hover:bg-lilac-100"
+                  aria-label="Open original image in a new tab"
                 >
-                  <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <ExternalLink className="w-4 h-4" />
                 </a>
                 <button
                   onClick={() => setActivePosterModal(null)}
-                  className="p-1.5 sm:p-2 rounded-full hover:bg-slate-800 text-slate-300 hover:text-white transition-colors"
-                  title="Close modal"
+                  className="w-10 h-10 rounded-full bg-ink text-white border-2 border-ink flex items-center justify-center"
+                  aria-label="Close poster"
                 >
-                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
 
-            {/* Poster Image Viewport */}
-            <div className="flex-1 overflow-auto p-2 sm:p-4 flex items-center justify-center bg-slate-950">
+            <div className="flex-1 overflow-auto p-3 sm:p-5 flex items-center justify-center bg-lilac-100">
               <img
                 src={activePosterModal.posterUrl}
-                alt={activePosterModal.title || 'Student Body Poster'}
-                className="max-h-[65vh] sm:max-h-[70vh] w-auto max-w-full object-contain rounded-xl shadow-lg"
+                alt={activePosterModal.title || 'Student body poster'}
+                className="max-h-[66vh] w-auto max-w-full object-contain rounded-xl border-2 border-ink"
               />
             </div>
 
-            {/* Modal Bottom Bar */}
-            <div className="p-3.5 sm:p-4 px-4 sm:px-6 bg-slate-900/90 border-t border-slate-800 text-xs text-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[11px]">
+            {(activePosterModal.facultyAdvisor || activePosterModal.studentPresident) && (
+              <dl className="px-5 sm:px-7 py-3 border-t-2 border-ink flex flex-wrap gap-x-10 gap-y-2 text-sm">
                 {activePosterModal.facultyAdvisor && (
                   <div>
-                    <span className="text-[9px] sm:text-[10px] text-slate-500 uppercase font-bold block">Faculty Advisor:</span>
-                    <span className="font-semibold text-slate-200">{activePosterModal.facultyAdvisor}</span>
+                    <dt className="text-xs font-semibold text-slate-500">Faculty advisor</dt>
+                    <dd className="font-bold">{activePosterModal.facultyAdvisor}</dd>
                   </div>
                 )}
                 {activePosterModal.studentPresident && (
                   <div>
-                    <span className="text-[9px] sm:text-[10px] text-slate-500 uppercase font-bold block">Student President:</span>
-                    <span className="font-semibold text-slate-200">{activePosterModal.studentPresident}</span>
+                    <dt className="text-xs font-semibold text-slate-500">Student president</dt>
+                    <dd className="font-bold">{activePosterModal.studentPresident}</dd>
                   </div>
                 )}
-              </div>
-
-              <button
-                onClick={() => setActivePosterModal(null)}
-                className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs self-end sm:self-auto transition-colors"
-              >
-                Close View
-              </button>
-            </div>
+              </dl>
+            )}
           </div>
         </div>
       )}
 
-      {/* Footer */}
       <Footer />
     </main>
+  );
+}
+
+function ListingSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-12" aria-hidden="true">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="rounded-[26px] border-2 border-ink bg-white overflow-hidden animate-pulse shadow-pop">
+          <div className="aspect-[4/3] bg-lilac-100 border-b-2 border-ink" />
+          <div className="p-5 space-y-3">
+            <div className="h-7 w-3/4 bg-lilac-100 rounded-full" />
+            <div className="h-4 w-full bg-lilac-100 rounded-full" />
+            <div className="h-4 w-2/3 bg-lilac-100 rounded-full" />
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

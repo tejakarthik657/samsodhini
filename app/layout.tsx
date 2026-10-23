@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import Preloader from '../components/Preloader';
 
 export const metadata: Metadata = {
-  title: "SUMSHODHINI | National Science & Technology Symposium • KITSW Warangal",
+  title: "SUMSHODHINI | National Level Technical Symposium • KITSW Warangal",
   description: "The official platform and institutional heritage archive of Sumshodhini at Kakatiya Institute of Technology & Science, Warangal (KITSW). Featuring department flagship masterclasses, national competitions, delegate registrations, and institutional legacy vault.",
   keywords: ["Sumshodhini", "KITSW", "Warangal", "Kakatiya Institute of Technology and Science", "Technical Symposium", "Workshops", "Hackathons", "Robotics", "Engineering Symposium"],
 };
@@ -12,7 +13,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: 'cover',
-  themeColor: '#0f172a',
+  themeColor: '#3A4BFF',
 };
 
 export default function RootLayout({
@@ -21,16 +22,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "try{if(sessionStorage.getItem('sam-pre'))document.documentElement.classList.add('no-preload')}catch(e){}",
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link 
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" 
-          rel="stylesheet" 
-        />
       </head>
-      <body className="min-h-screen bg-[#FAF9F5] text-slate-900 antialiased selection:bg-blue-100 selection:text-blue-900">
+      <body className="min-h-screen bg-paper text-slate-900 antialiased selection:bg-marigold-300 selection:text-ink">
+        <Preloader />
         {children}
       </body>
     </html>

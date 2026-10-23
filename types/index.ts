@@ -3,6 +3,7 @@ export interface Edition {
   name: string;
   theme?: string;
   dates?: string;
+  posterUrl?: string | null;
   isActive: boolean;
   status: 'upcoming' | 'live' | 'archived';
   createdAt?: string;

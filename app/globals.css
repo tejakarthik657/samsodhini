@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@500..800&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,125 +6,133 @@
 
 @layer base {
   :root {
-    --canvas-bg: #FAF9F6;
+    --paper: #F7F5FF;
+    --ink: #15123F;
+    --cobalt: #3A4BFF;
+    --marigold: #FFAB00;
+    --coral: #FF5A4D;
+    --lilac: #D9D2FF;
+    --rule: #DEDBEE;
   }
 
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 96px;
   }
 
   body {
-    background-color: #FAF9F6;
-    color: #0F172A;
-    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
+
+  :focus-visible {
+    outline: 3px solid var(--cobalt);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  /* Syne is wide and heavy; tight tracking and tight leading give it the poster feel. */
+  .font-display {
+    font-family: 'Syne', 'Instrument Sans', system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+  }
+
+  h1, h2, h3 { text-wrap: balance; }
+
+  /* Syne is for short, huge words. Longer headings use the body family at extra-bold. */
+  h3.font-display, h4.font-display, h5.font-display {
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
 }
 
-/* 21st.dev Mesh Aurora & Texture Backgrounds */
-.aurora-bg {
-  background: 
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.12), transparent),
-    radial-gradient(ellipse 60% 40% at 85% 15%, rgba(147, 51, 234, 0.08), transparent),
-    radial-gradient(ellipse 50% 30% at 15% 25%, rgba(245, 158, 11, 0.07), transparent),
-    #FAF9F6;
+/* Chunky sticker surface used by cards, chips and panels. */
+.pop {
+  border: 2px solid var(--ink);
+  box-shadow: 5px 5px 0 0 var(--ink);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
+}
+.pop:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 9px 9px 0 0 var(--ink);
+}
+.pop:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 0 var(--ink);
 }
 
-.bg-grid-pattern {
-  background-size: 36px 36px;
-  background-image: 
-    linear-gradient(to right, rgba(15, 23, 42, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
+.stroke-text {
+  color: transparent;
+  -webkit-text-stroke: 2px currentColor;
 }
 
-.bg-dot-pattern {
-  background-image: radial-gradient(rgba(15, 23, 42, 0.09) 1px, transparent 1px);
-  background-size: 24px 24px;
+/* Film grain used on coloured blocks. */
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.14;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* 21st.dev Floating Glass Dock */
-.floating-glass-dock {
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 
-    0 20px 40px -15px rgba(15, 23, 42, 0.08),
-    0 0 0 1px rgba(15, 23, 42, 0.05);
+/* Dot grid for coloured blocks */
+.dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.22) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+}
+.dots-ink {
+  background-image: radial-gradient(rgba(21, 18, 63, 0.16) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
 }
 
-/* Card Micro-Elevation & Border Glow */
-.bento-card {
-  position: relative;
-  background: #FFFFFF;
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+/* Helpers kept so older components keep rendering on-brand. */
+.blueprint {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
 }
-
-.bento-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(203, 213, 225, 1);
-  box-shadow: 
-    0 20px 35px -10px rgba(15, 23, 42, 0.07),
-    0 0 0 1px rgba(15, 23, 42, 0.04);
+.rule-ticks {
+  height: 10px;
+  background-image: repeating-linear-gradient(to right, currentColor 0 2px, transparent 2px 12px);
 }
-
-/* Pill Indicator & Glows */
-.shimmer-badge {
-  background: linear-gradient(110deg, #FFFFFF 45%, #F1F5F9 55%, #FFFFFF);
-  background-size: 200% 100%;
-  animation: shimmer 4s infinite linear;
+.aurora-bg { background: var(--paper); }
+.bg-grid-pattern, .bg-dot-pattern {
+  background-image: radial-gradient(rgba(21, 18, 63, 0.12) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
 }
-
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
+.floating-glass-dock { background: #fff; border: 2px solid var(--ink); }
+.bento-card { background: #fff; border: 2px solid var(--ink); }
+.shimmer-badge { background: #fff; }
+.pulse-glow { animation: pulseGlow 2.5s infinite; }
 @keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.25);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(37, 99, 235, 0);
-  }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 171, 0, 0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 171, 0, 0); }
 }
 
-.pulse-glow {
-  animation: pulseGlow 2.5s infinite;
-}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #15123F; border-radius: 9999px; border: 2px solid var(--paper); }
 
-/* Custom Minimalist Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+* { -webkit-tap-highlight-color: transparent; }
 
-::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
-}
-
-/* Utilities for Ultra-Smooth Mobile Touch Browsing */
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-none {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-* {
-  -webkit-tap-highlight-color: transparent;
-}
+/* Returning visitors in the same session skip the opening screen. */
+.no-preload #preloader { display: none !important; }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '../../../lib/db';
+import { BRANCH_ALIASES, BRANCH_LOOKUP } from '../../../lib/branches';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,9 +30,24 @@ export async function GET() {
       ORDER BY code ASC
     `);
 
+    const rows = res.rows
+      .filter((r: any, _i: number, all: any[]) => {
+        const c = String(r.code).toUpperCase();
+        const parent = BRANCH_ALIASES[c];
+        // Keep one alias row (EVL) as the parent's card when the parent has no row of its own.
+        return !parent || (c === 'EVL' && !all.some((x: any) => String(x.code).toUpperCase() === parent));
+      })
+      .map((r: any) => {
+        const code = BRANCH_ALIASES[String(r.code).toUpperCase()] || String(r.code).toUpperCase();
+        const info = BRANCH_LOOKUP[code];
+        return info
+          ? { ...r, code, name: info.name, shortName: info.shortName, associationName: info.associationName, associationShort: info.associationShort }
+          : r;
+      });
+
     return NextResponse.json({
       success: true,
-      data: res.rows,
+      data: rows,
     });
   } catch (error: any) {
     console.error('Error fetching branches:', error);

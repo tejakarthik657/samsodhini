@@ -1,262 +1,113 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Compass, 
-  Cpu, 
-  Users2, 
-  Award, 
-  Crown, 
-  Lightbulb, 
-  GraduationCap, 
-  Network, 
-  TrendingUp,
-  Layers,
-  ArrowRight,
-  Sparkles,
-  BookOpen,
-  Trophy,
-  CheckCircle2
-} from 'lucide-react';
+import ScrollReveal from './ui/ScrollReveal';
+
+const DIMENSIONS = [
+  {
+    title: 'Exploration',
+    tagline: 'Discover what the syllabus does not cover.',
+    desc: 'Delegates meet emerging technologies, new system architectures and engineering frontiers that textbooks have not caught up with yet.',
+    points: ['Industry-relevant masterclasses', 'Exposure to several tech stacks', 'Research-grade tools and frameworks'],
+    bar: 'bg-marigold-400 text-ink',
+  },
+  {
+    title: 'Application',
+    tagline: 'Turn classroom theory into working things.',
+    desc: 'Knowing a concept and applying it under unfamiliar constraints are different skills. Sumshodhini turns theory into prototypes, running circuits and compiled code.',
+    points: ['Hands-on laboratory problem sets', 'Live debugging and rapid prototyping', 'A working system at the end of the day'],
+    bar: 'bg-lilac-200 text-ink',
+  },
+  {
+    title: 'Collaboration',
+    tagline: 'Work with people from other institutes.',
+    desc: 'Students, faculty and domain specialists from engineering colleges across Telangana and India exchange methods and ways of framing problems.',
+    points: ['Delegates from multiple institutions', 'Projects that cross branches', 'Faculty and industry mentors'],
+    bar: 'bg-mint-300 text-ink',
+  },
+  {
+    title: 'Achievement',
+    tagline: 'Leave with proof of what you can do.',
+    desc: 'A national stage where technical work earns merit citations, cash prizes and credentials verified by the ISTE chapter.',
+    points: ['National recognition', 'ISTE KITSW verified credentials', 'Cash awards and trophies'],
+    bar: 'bg-coral-400 text-ink',
+  },
+  {
+    title: 'Leadership',
+    tagline: 'Students run the whole event.',
+    desc: 'Department associations plan, budget and deliver Sumshodhini themselves, which teaches coordination, crisis handling and accountability.',
+    points: ['Association-level autonomy', 'Large-scale operations', 'Institutional stewardship year to year'],
+    bar: 'bg-cobalt-300 text-ink',
+  },
+];
 
 export default function SumshodhiniPhilosophy() {
-  const [activeDimension, setActiveDimension] = useState<number>(0);
-
-  const dimensions = [
-    {
-      title: 'Exploration',
-      icon: Compass,
-      accent: 'text-blue-600 bg-blue-50 border-blue-200',
-      pill: 'Dimension 01',
-      tagline: 'Discover beyond the regular curriculum',
-      desc: 'Students discover emerging technologies, novel system architectures, and engineering frontiers beyond textbook syllabi, fostering curiosity and opening doors to frontier domains.',
-      bullets: ['Curated industry-relevant masterclasses', 'Exposure to multi-disciplinary tech stacks', 'Research-grade tools & frameworks']
-    },
-    {
-      title: 'Application',
-      icon: Cpu,
-      accent: 'text-emerald-600 bg-emerald-50 border-emerald-200',
-      pill: 'Dimension 02',
-      tagline: 'Bridging classroom theory with hands-on practice',
-      desc: 'Knowing a concept and applying it to unfamiliar constraints are vastly different. Sumshodhini transforms classroom theory into working prototypes, running circuits, and compiled code.',
-      bullets: ['Hands-on laboratory problem sets', 'Real-time debugging & rapid prototyping', 'Tangible outputs and working systems']
-    },
-    {
-      title: 'Collaboration',
-      icon: Users2,
-      accent: 'text-indigo-600 bg-indigo-50 border-indigo-200',
-      pill: 'Dimension 03',
-      tagline: 'Cross-pollinating talent across institutes',
-      desc: 'Sumshodhini converges students, faculty, and domain specialists from engineering institutions across Telangana and India, exchanging technical methodologies and problem perspectives.',
-      bullets: ['Multi-institutional delegate interaction', 'Inter-branch collaborative projects', 'Faculty and industry mentorship network']
-    },
-    {
-      title: 'Achievement',
-      icon: Award,
-      accent: 'text-amber-600 bg-amber-50 border-amber-200',
-      pill: 'Dimension 04',
-      tagline: 'Tangible proof of competence and innovation',
-      desc: 'Provides a high-visibility stage where technical brilliance receives institutional validation, merit citations, cash prize pools, and accredited professional credentials.',
-      bullets: ['National competitive recognition', 'ISTE KITSW verified credentials', 'Substantial cash awards & trophies']
-    },
-    {
-      title: 'Leadership',
-      icon: Crown,
-      accent: 'text-rose-600 bg-rose-50 border-rose-200',
-      pill: 'Dimension 05',
-      tagline: 'Student-led operational mastery',
-      desc: 'Organized from the ground up by student conveners across departmental associations, imparting organizational strategy, crisis management, budget stewardship, and leadership excellence.',
-      bullets: ['Student association autonomy', 'Large-scale operational coordination', 'Long-term institutional stewardship']
-    }
-  ];
-
-  const pillars = [
-    { title: 'Education', desc: 'Learning that extends far beyond lecture halls through active industry immersion.', icon: GraduationCap },
-    { title: 'Innovation', desc: 'Turning curiosity into deployable prototypes, patents, and engineering solutions.', icon: Lightbulb },
-    { title: 'Community', desc: 'Bringing students, research faculty, and technical societies into a shared ecosystem.', icon: Network },
-    { title: 'Development', desc: 'Cultivating enduring technical competence, operational resilience, and confidence.', icon: TrendingUp },
-  ];
+  const [open, setOpen] = useState(0);
 
   return (
-    <section className="py-16 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full border-t border-slate-200/80 bg-grid-pattern relative">
-      {/* Section Header */}
-      <div className="max-w-3xl mx-auto text-center space-y-3 mb-14">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white text-slate-800 border border-slate-200 text-xs font-bold shadow-xs">
-          <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-          <span>The Conceptual Blueprint</span>
-        </div>
+    <section id="about" className="relative bg-ink text-white py-20 sm:py-32 overflow-hidden">
+      <div className="absolute inset-0 dots opacity-40" aria-hidden="true" />
+      <div className="relative max-w-[1500px] mx-auto px-4 sm:px-8">
+        <ScrollReveal
+          className="font-sans font-extrabold tracking-[-0.035em] text-[2.2rem] sm:text-6xl lg:text-[5.4rem] leading-[1] max-w-6xl"
+          text="Students who stopped reading about technology and started building it. Day one is depth, a workshop from every department. Day two is the arena, with national prizes."
+        />
 
-        <h2 className="text-2xl sm:text-4xl font-black text-slate-950 tracking-tight">
-          What Sets <span className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-800 bg-clip-text text-transparent">SUMSHODHINI</span> Apart
-        </h2>
-
-        <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
-          More than an annual symposium — SUMSHODHINI is Kakatiya Institute of Technology & Science&apos;s 
-          apex student-driven engine for technological exploration, hands-on experimentation, and collaborative excellence.
-        </p>
-      </div>
-
-      {/* 2-Day Architecture Bento Banner */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-12">
-        {/* Day 1 Card */}
-        <div className="relative p-5 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border border-slate-200 shadow-xs flex flex-col justify-between overflow-hidden group hover:border-blue-300 transition-colors">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
-          
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200">
-                DAY 1 OF 2
-              </span>
-              <BookOpen className="w-5 h-5 text-blue-600" />
-            </div>
-
-            <h3 className="text-xl font-black text-slate-900 tracking-tight">
-              Flagship Academic Masterclasses
-            </h3>
-
-            <p className="text-xs text-slate-600 leading-relaxed font-normal">
-              <strong>Exactly one flagship workshop per engineering department</strong> headed by senior student conveners, faculty mentors, and external research scientists. Intensive, day-long hands-on labs with dedicated syllabus modules and accredited certificates.
+        <div className="mt-20 sm:mt-28 grid lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-4">
+            <h2 className="font-display uppercase text-4xl sm:text-5xl leading-[0.95] text-marigold-400">Five ideas behind it</h2>
+            <p className="mt-4 text-base text-white/80 max-w-xs leading-snug">
+              Pick one. These are what every workshop and contest is built to deliver.
             </p>
           </div>
 
-          <div className="pt-6 border-t border-slate-100 mt-6 flex items-center justify-between text-xs font-bold text-slate-800">
-            <span>8 Specialized Department Labs</span>
-            <span className="text-blue-700 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-              Explore Day 1 Workshops <ArrowRight className="w-3.5 h-3.5" />
-            </span>
-          </div>
+          <ul className="lg:col-span-8 space-y-3">
+            {DIMENSIONS.map((d, i) => {
+              const isOpen = open === i;
+              return (
+                <li key={d.title}>
+                  <div className={`rounded-[22px] border-2 border-ink ${d.bar} overflow-hidden transition-shadow ${isOpen ? 'shadow-[6px_6px_0_0_#FFAB00]' : ''}`}>
+                    <button
+                      type="button"
+                      aria-expanded={isOpen}
+                      onClick={() => setOpen(isOpen ? -1 : i)}
+                      className="w-full flex items-center justify-between gap-4 text-left px-5 sm:px-8 py-4 sm:py-5"
+                    >
+                      <span className="flex items-baseline gap-4">
+                        <span className="text-sm font-bold tabular-nums opacity-60">{String(i + 1).padStart(2, '0')}</span>
+                        <span className="font-display text-2xl sm:text-4xl leading-none">{d.title}</span>
+                      </span>
+                      <span
+                        className={`shrink-0 w-10 h-10 rounded-full border-2 border-ink bg-white flex items-center justify-center text-2xl font-bold transition-transform ${
+                          isOpen ? 'rotate-45' : ''
+                        }`}
+                        aria-hidden="true"
+                      >
+                        +
+                      </span>
+                    </button>
+                    {isOpen && (
+                      <div className="px-5 sm:px-8 pb-6 sm:pb-8 grid sm:grid-cols-2 gap-6 animate-slide-up">
+                        <div>
+                          <p className="font-sans font-extrabold tracking-tight text-xl sm:text-2xl leading-[1.1]">{d.tagline}</p>
+                          <p className="mt-3 text-base leading-snug">{d.desc}</p>
+                        </div>
+                        <ul className="space-y-2">
+                          {d.points.map((pt) => (
+                            <li key={pt} className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/70 border-2 border-ink text-sm font-semibold">
+                              <span aria-hidden="true">✺</span>
+                              {pt}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         </div>
-
-        {/* Day 2 Card */}
-        <div className="relative p-5 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border border-slate-200 shadow-xs flex flex-col justify-between overflow-hidden group hover:border-purple-300 transition-colors">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50/50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-purple-50 text-purple-800 border border-purple-200">
-                DAY 2 OF 2
-              </span>
-              <Trophy className="w-5 h-5 text-purple-600" />
-            </div>
-
-            <h3 className="text-xl font-black text-slate-900 tracking-tight">
-              National Technical Competitions & Arena
-            </h3>
-
-            <p className="text-xs text-slate-600 leading-relaxed font-normal">
-              <strong>Multiple high-stakes challenges per department</strong>: 24-Hour Hackathons, algorithmic speed sprints, combat robotics, hardware circuit debugging, CAD structural modeling, paper presentations, and grand project innovation expos with substantial cash prize pools.
-            </p>
-          </div>
-
-          <div className="pt-6 border-t border-slate-100 mt-6 flex items-center justify-between text-xs font-bold text-slate-800">
-            <span>36+ Competitive Arenas</span>
-            <span className="text-purple-700 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-              View Day 2 Challenges <ArrowRight className="w-3.5 h-3.5" />
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* The 5 Interconnected Dimensions Interactive Section */}
-      <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-5 sm:p-10 shadow-xs mb-12">
-        <div className="max-w-2xl mb-8">
-          <span className="text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider">
-            FOUNDATIONAL ARCHITECTURE
-          </span>
-          <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
-            The Five Dimensions of Sumshodhini
-          </h3>
-          <p className="text-xs text-slate-500 mt-1">
-            An interconnected conceptual framework defining how delegates move from passive curiosity to leadership mastery.
-          </p>
-        </div>
-
-        {/* Tab Pills */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-none pb-4 border-b border-slate-100">
-          {dimensions.map((dim, idx) => {
-            const Icon = dim.icon;
-            const isSelected = activeDimension === idx;
-            return (
-              <button
-                key={dim.title}
-                onClick={() => setActiveDimension(idx)}
-                className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border shrink-0 whitespace-nowrap ${
-                  isSelected
-                    ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                }`}
-              >
-                <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-slate-500'}`} />
-                <span>{dim.title}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Active Dimension Details */}
-        <div className="pt-6 sm:pt-8 grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-center">
-          <div className="md:col-span-7 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
-                {dimensions[activeDimension].pill}
-              </span>
-              <h4 className="text-lg sm:text-xl font-black text-slate-900">
-                {dimensions[activeDimension].tagline}
-              </h4>
-            </div>
-
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-              {dimensions[activeDimension].desc}
-            </p>
-
-            <div className="space-y-2 pt-2">
-              {dimensions[activeDimension].bullets.map((bullet, i) => (
-                <div key={i} className="flex items-center gap-2.5 text-xs text-slate-700 font-semibold">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{bullet}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="md:col-span-5 p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-            <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">
-              EXPERIENCE CYCLE IMPACT
-            </span>
-            <div className="space-y-2 text-xs">
-              <div className="p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between font-bold text-slate-800">
-                <span>Core Stakeholder</span>
-                <span className="text-blue-700">Engineering Delegates & Conveners</span>
-              </div>
-              <div className="p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between font-bold text-slate-800">
-                <span>Execution Period</span>
-                <span className="text-slate-900 font-mono">Day 1 & Day 2 Synchronized</span>
-              </div>
-              <div className="p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between font-bold text-slate-800">
-                <span>Long-Term Output</span>
-                <span className="text-emerald-700">Practical Fluency & Leadership</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 4 Pillars of Deeper Identity Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {pillars.map((pillar, i) => {
-          const Icon = pillar.icon;
-          return (
-            <div key={i} className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs space-y-2.5">
-              <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-800">
-                <Icon className="w-4 h-4" />
-              </div>
-              <h4 className="text-sm font-black text-slate-900">{pillar.title}</h4>
-              <p className="text-xs text-slate-500 leading-relaxed font-normal">
-                {pillar.desc}
-              </p>
-            </div>
-          );
-        })}
       </div>
     </section>
   );

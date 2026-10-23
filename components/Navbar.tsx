@@ -2,22 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { 
-  Menu, 
-  X, 
-  BookOpen, 
-  Trophy, 
-  Calendar, 
-  Archive, 
-  MapPin, 
-  ShieldCheck, 
-  ArrowRight,
-  Sparkles,
-  ChevronDown,
-  Check,
-  Award,
-  Camera
-} from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import { Edition } from '../types';
 
 interface NavbarProps {
@@ -26,57 +12,73 @@ interface NavbarProps {
   editions?: Edition[];
 }
 
-export default function Navbar({
-  selectedYear,
-  onSelectYear,
-  editions: propEditions
-}: NavbarProps) {
-  const [isScrolled, setIsScrolled] = useState(false);
+const LINKS = [
+  { href: '/#workshops', label: 'Workshops' },
+  { href: '/#events', label: 'Competitions' },
+  { href: '/#schedule', label: 'Schedule' },
+  { href: '/#student-body', label: 'Student bodies' },
+  { href: '/gallery', label: 'Gallery' },
+  { href: '/#heritage', label: 'Heritage' },
+];
+
+export default function Navbar({ selectedYear, onSelectYear, editions: propEditions }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [editionDropdownOpen, setEditionDropdownOpen] = useState(false);
   const [localEditions, setLocalEditions] = useState<Edition[]>([]);
   const [localYear, setLocalYear] = useState<number>(selectedYear || 2026);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
+  const [activeId, setActiveId] = useState<string>('');
 
-  // Sync with prop changes if passed
   useEffect(() => {
-    if (selectedYear) {
-      setLocalYear(selectedYear);
-    }
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Highlight the section being read on the home page.
+  useEffect(() => {
+    if (pathname !== '/') { setActiveId(''); return; }
+    const ids = ['workshops', 'events', 'schedule', 'student-body', 'heritage'];
+    const els = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
+    if (!els.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActiveId(visible.target.id);
+      },
+      { rootMargin: '-35% 0px -55% 0px', threshold: [0, 0.1, 0.5] }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [pathname]);
+
+  useEffect(() => {
+    if (selectedYear) setLocalYear(selectedYear);
   }, [selectedYear]);
 
-  // Load editions if not passed from parent
   useEffect(() => {
     if (propEditions && propEditions.length > 0) {
       setLocalEditions(propEditions);
-    } else {
-      const fetchEditions = async () => {
-        try {
-          const res = await fetch('/api/editions');
-          const json = await res.json();
-          if (json.success && json.data) {
-            setLocalEditions(json.data);
-            if (!selectedYear && json.activeEdition) {
-              setLocalYear(json.activeEdition.year);
-            }
-          }
-        } catch (err) {
-          console.error('Failed to load editions in navbar:', err);
-        }
-      };
-      fetchEditions();
+      return;
     }
+    const fetchEditions = async () => {
+      try {
+        const res = await fetch('/api/editions');
+        const json = await res.json();
+        if (json.success && json.data) {
+          setLocalEditions(json.data);
+          if (!selectedYear && json.activeEdition) setLocalYear(json.activeEdition.year);
+        }
+      } catch (err) {
+        console.error('Failed to load editions in navbar:', err);
+      }
+    };
+    fetchEditions();
   }, [propEditions, selectedYear]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 15);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Close dropdown on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -87,278 +89,147 @@ export default function Navbar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
+
   const handleYearChange = (year: number) => {
     setLocalYear(year);
     setEditionDropdownOpen(false);
-    if (onSelectYear) {
-      onSelectYear(year);
-    }
+    onSelectYear?.(year);
   };
 
   const currentYear = selectedYear || localYear;
   const editionsList = propEditions && propEditions.length > 0 ? propEditions : localEditions;
+  const yy = String(currentYear).slice(-2);
 
   return (
-    <header className="fixed top-2 sm:top-4 inset-x-0 z-50 max-w-6xl mx-auto px-2.5 sm:px-6 pointer-events-none">
-      {/* Floating Island Navigation Capsule */}
-      <div 
-        className={`pointer-events-auto transition-all duration-300 floating-glass-dock ${
-          mobileMenuOpen ? 'rounded-3xl' : 'rounded-full'
-        } ${
-          isScrolled 
-            ? 'py-2 px-3 sm:px-4 bg-white/95 shadow-[0_20px_40px_-15px_rgba(15,23,42,0.12)]' 
-            : 'py-2 px-3 sm:py-2.5 sm:px-5 bg-white/90 shadow-[0_12px_32px_-10px_rgba(15,23,42,0.08)]'
-        }`}
-      >
-        <div className="flex items-center justify-between gap-2">
-          {/* Brand Logo & Dynamic Edition Selector */}
-          <div className="flex items-center gap-2">
-            <Link href="/" className="flex items-center gap-1.5 sm:gap-2 group shrink-0">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white p-1 border border-slate-200/90 shadow-xs flex items-center justify-center transition-transform group-hover:scale-105 duration-200 shrink-0">
-                <img 
-                  src="/Sumshodhini26icon.png" 
-                  alt="Sumshodhini Emblem" 
-                  className="w-full h-full object-contain"
+    <>
+      <header className="fixed top-3 inset-x-3 sm:inset-x-6 z-50">
+        <div className={`max-w-7xl mx-auto flex items-center justify-between gap-3 bg-white border-2 border-ink rounded-full pl-2 pr-2 transition-all duration-300 ${scrolled ? 'py-1.5 shadow-pop' : 'py-2 shadow-pop-sm'}`}>
+          <div className="flex items-center gap-2 min-w-0">
+            <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Sumshodhini home">
+              <span className="w-10 h-10 rounded-full bg-white border-2 border-ink overflow-hidden flex items-center justify-center shrink-0">
+                <img
+                  src="/Sumshodhini26icon.png"
+                  alt=""
+                  className="w-full h-full object-contain scale-110"
                   onError={(e) => { e.currentTarget.src = '/logo.png'; }}
                 />
-              </div>
-
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1">
-                  <span className="text-xs sm:text-base font-black tracking-tight text-slate-900 group-hover:text-blue-900 transition-colors">
-                    SUMSHODHINI
-                  </span>
-                </div>
-                <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-slate-500 font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span>KITSW National Symposium</span>
-                </div>
-              </div>
+              </span>
+              <span className="font-display text-xl sm:text-2xl leading-none text-ink">Sumshodhini</span>
             </Link>
 
-            {/* Interactive Edition Dropdown Pill */}
             <div className="relative" ref={dropdownRef}>
               <button
                 type="button"
-                onClick={() => setEditionDropdownOpen(!editionDropdownOpen)}
-                className="flex items-center gap-1 text-[10px] sm:text-[11px] font-mono font-black text-slate-800 bg-slate-100 hover:bg-slate-200/80 px-2 py-0.5 rounded-full border border-slate-200 transition-all shadow-2xs"
-                title="Select Symposium Edition"
+                onClick={() => setEditionDropdownOpen((o) => !o)}
+                aria-haspopup="listbox"
+                aria-expanded={editionDropdownOpen}
+                aria-label={`Edition ${currentYear}. Change edition`}
+                className="flex items-center gap-1 text-sm font-bold bg-marigold-400 hover:bg-marigold-300 border-2 border-ink px-2.5 py-1 rounded-full transition-colors tabular-nums"
               >
-                <span>&apos;{String(currentYear).slice(-2)}</span>
-                <ChevronDown className={`w-3 h-3 text-slate-500 transition-transform ${editionDropdownOpen ? 'rotate-180' : ''}`} />
+                <span>&apos;{yy}</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${editionDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {editionDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-52 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="px-3 py-1 text-[10px] font-mono uppercase text-slate-400 font-bold border-b border-slate-100 mb-1">
-                    Symposium Editions
-                  </div>
+                <div
+                  role="listbox"
+                  className="absolute top-full left-0 mt-3 w-64 bg-white border-2 border-ink rounded-2xl shadow-pop p-1.5 z-50"
+                >
+                  <p className="px-3 py-1.5 text-xs font-semibold text-slate-500">Choose an edition</p>
                   {editionsList.length === 0 ? (
-                    <div className="px-3 py-2 text-xs text-slate-500">
-                      Edition &apos;{String(currentYear).slice(-2)} (Active)
-                    </div>
+                    <p className="px-3 py-2 text-sm text-slate-700">Sumshodhini &apos;{yy} (live)</p>
                   ) : (
                     editionsList.map((ed) => (
                       <button
                         key={ed.year}
                         type="button"
+                        role="option"
+                        aria-selected={ed.year === currentYear}
                         onClick={() => handleYearChange(ed.year)}
-                        className={`w-full text-left px-3 py-2 text-xs font-semibold flex items-center justify-between hover:bg-slate-50 transition-colors ${
-                          ed.year === currentYear ? 'text-blue-900 font-bold bg-blue-50/70' : 'text-slate-700'
+                        className={`w-full text-left px-3 py-2 rounded-xl text-sm flex items-center justify-between transition-colors ${
+                          ed.year === currentYear ? 'bg-cobalt-500 text-white font-bold' : 'hover:bg-lilac-100 text-ink font-semibold'
                         }`}
                       >
-                        <div className="flex flex-col">
-                          <span>Sumshodhini &apos;{String(ed.year).slice(-2)}</span>
-                          <span className="text-[10px] text-slate-400 font-normal">{ed.year} Academic Cycle</span>
-                        </div>
-                        {ed.isActive ? (
-                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold">
-                            Live
-                          </span>
-                        ) : (
-                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-medium">
-                            Archived
-                          </span>
-                        )}
+                        <span>Sumshodhini &apos;{String(ed.year).slice(-2)}</span>
+                        <span
+                          className={`text-xs px-1.5 py-0.5 rounded-md border ${
+                            ed.isActive ? 'bg-marigold-400 text-ink border-ink' : 'bg-white/20 border-current opacity-80'
+                          }`}
+                        >
+                          {ed.isActive ? 'Live' : 'Archive'}
+                        </span>
                       </button>
                     ))
                   )}
-                  <div className="pt-1.5 mt-1 border-t border-slate-100 px-3">
-                    <Link
-                      href="/organizer"
-                      className="text-[10px] font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1"
-                    >
-                      <ShieldCheck className="w-3 h-3" />
-                      <span>Organizer Portal</span>
-                    </Link>
-                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1 bg-slate-100/70 p-1 rounded-full border border-slate-200/60 text-xs font-bold text-slate-700">
-            <Link 
-              href="/#workshops" 
-              className="px-3.5 py-1.5 rounded-full hover:bg-white hover:text-slate-950 transition-all flex items-center gap-1.5 shadow-none hover:shadow-xs"
-            >
-              <span className="w-2 h-2 rounded-full bg-blue-600"></span>
-              <span>Day 1: Workshops</span>
-            </Link>
-
-            <Link 
-              href="/#events" 
-              className="px-3.5 py-1.5 rounded-full hover:bg-white hover:text-slate-950 transition-all flex items-center gap-1.5 shadow-none hover:shadow-xs"
-            >
-              <span className="w-2 h-2 rounded-full bg-purple-600"></span>
-              <span>Day 2: Competitions</span>
-            </Link>
-
-            <Link 
-              href="/#schedule" 
-              className="px-3 py-1.5 rounded-full hover:bg-white hover:text-slate-950 transition-all"
-            >
-              Schedule
-            </Link>
-
-            <Link 
-              href="/#student-body" 
-              className="px-3 py-1.5 rounded-full hover:bg-white hover:text-slate-950 transition-all"
-            >
-              Student Body
-            </Link>
-
-            <Link 
-              href="/#heritage" 
-              className="px-3 py-1.5 rounded-full hover:bg-white hover:text-slate-950 transition-all"
-            >
-              Heritage Vault
-            </Link>
-
-            <Link 
-              href="/gallery" 
-              className="px-3 py-1.5 rounded-full hover:bg-white hover:text-slate-950 transition-all"
-            >
-              Gallery
-            </Link>
+          <nav className="hidden xl:flex flex-1 items-center justify-center gap-1 text-sm font-semibold" aria-label="Primary">
+            {LINKS.map((l) => {
+              const hash = l.href.startsWith('/#') ? l.href.slice(2) : '';
+              const active = hash ? activeId === hash : pathname === l.href;
+              return (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  aria-current={active ? 'true' : undefined}
+                  className={`px-4 py-2 rounded-full border-2 transition-colors ${
+                    active ? 'bg-cobalt-500 text-white border-ink' : 'text-ink border-transparent hover:bg-lilac-200'
+                  }`}
+                >
+                  {l.label}
+                </Link>
+              );
+            })}
           </nav>
 
-          {/* Action Button: Organizer Portal */}
-          <div className="hidden sm:flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Link
-              href="/organizer"
-              className="inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
+              href="/#poster"
+              className="hidden xl:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-marigold-400 hover:bg-marigold-300 border-2 border-ink text-ink text-sm font-bold transition-colors"
             >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Organizer Portal</span>
+              Get the poster
             </Link>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((o) => !o)}
+              className="xl:hidden w-10 h-10 rounded-full bg-cobalt-500 text-white border-2 border-ink flex items-center justify-center"
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
-
-          {/* Mobile Menu Toggle Button */}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors"
-            aria-label="Toggle Navigation"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
         </div>
+      </header>
 
-        {/* Mobile Dropdown Menu Drawer */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden pt-3 pb-2 mt-2 border-t border-slate-200 flex flex-col gap-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="flex items-center justify-between px-3 py-1.5 text-xs text-slate-500 font-semibold bg-slate-50 rounded-xl mb-1">
-              <span>Selected Academic Edition:</span>
-              <span className="font-mono font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
-                {currentYear}
-              </span>
-            </div>
-
-            <Link
-              href="/#workshops"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2.5 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
-            >
-              <div className="w-6 h-6 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
-                <BookOpen className="w-3.5 h-3.5" />
-              </div>
-              <div className="flex flex-col">
-                <span>Day 1: Flagship Masterclasses</span>
-                <span className="text-[10px] text-slate-400 font-normal">1 Workshop Per Branch</span>
-              </div>
-            </Link>
-
-            <Link
-              href="/#events"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2.5 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
-            >
-              <div className="w-6 h-6 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center shrink-0">
-                <Trophy className="w-3.5 h-3.5" />
-              </div>
-              <div className="flex flex-col">
-                <span>Day 2: National Arena Competitions</span>
-                <span className="text-[10px] text-slate-400 font-normal">Multi-Contest Arena</span>
-              </div>
-            </Link>
-
-            <Link
-              href="/#schedule"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2.5 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
-            >
-              <div className="w-6 h-6 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
-                <Calendar className="w-3.5 h-3.5" />
-              </div>
-              <span>Official 2-Day Itinerary</span>
-            </Link>
-
-            <Link
-              href="/#student-body"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2.5 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
-            >
-              <div className="w-6 h-6 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
-                <Award className="w-3.5 h-3.5" />
-              </div>
-              <span>Student Body Executive Posters</span>
-            </Link>
-
-            <Link
-              href="/#heritage"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2.5 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
-            >
-              <div className="w-6 h-6 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
-                <Archive className="w-3.5 h-3.5" />
-              </div>
-              <span>50-Year Heritage Vault</span>
-            </Link>
-
-            <Link
-              href="/gallery"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2.5 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
-            >
-              <div className="w-6 h-6 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center shrink-0">
-                <Camera className="w-3.5 h-3.5" />
-              </div>
-              <span>Media Gallery</span>
-            </Link>
-
-            <Link
-              href="/organizer"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-3 rounded-xl text-xs font-bold bg-slate-900 text-white text-center shadow-xs mt-1 flex items-center justify-center gap-2"
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Organizer Portal</span>
-            </Link>
-          </div>
-        )}
-      </div>
-    </header>
+      {mobileMenuOpen && (
+        <nav
+          className="xl:hidden fixed inset-0 z-40 bg-cobalt-500 pt-28 px-6 pb-8 overflow-y-auto animate-fade-in"
+          aria-label="Mobile"
+        >
+          <ul>
+            {LINKS.map((l, i) => (
+              <li key={l.href} className="border-b-2 border-white/30">
+                <Link
+                  href={l.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-baseline justify-between py-4 font-display text-4xl text-white"
+                >
+                  <span>{l.label}</span>
+                  <span className="text-base font-semibold text-marigold-300 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+    </>
   );
 }

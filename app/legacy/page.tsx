@@ -4,35 +4,28 @@ import React from 'react';
 import Navbar from '../../components/Navbar';
 import LegacyVault from '../../components/LegacyVault';
 import Footer from '../../components/Footer';
-import { ShieldCheck, Archive } from 'lucide-react';
+import PageHeader from '../../components/ui/PageHeader';
 
 export default function LegacyPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF9F6]">
+    <div className="min-h-screen flex flex-col bg-paper">
       <Navbar />
+      <PageHeader
+        title="Heritage vault"
+        description="Proceedings, keynote abstracts and souvenir magazines from past editions, kept for the students who come next."
+        tone="saffron"
+      />
 
-      <main className="flex-1 w-full pt-28 sm:pt-36 pb-16">
-        <LegacyVault />
+      <main className="flex-1 w-full">
+        <LegacyVault showHeading={false} />
 
-        {/* Institutional Charter */}
-        <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-200/90 shadow-xs space-y-3">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-blue-600" />
-              <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
-                Institutional Digital Charter
-              </span>
-            </div>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-900">
-              50-Year Heritage & Pedagogy Preservation
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-              Samshodhani is engineered to replace ephemeral WhatsApp groups and broken Google Drive links. 
-              By archiving symposium proceedings, resource person keynotes, delegate rosters, 
-              and souvenir magazines into the central repository, KITSW ensures five decades of engineering pedagogy 
-              remains accessible to future alumni, researchers, and student leaders.
-            </p>
-          </div>
+        <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <h2 className="font-display text-3xl sm:text-4xl text-ink">Why an archive</h2>
+          <p className="mt-3 text-base text-slate-700 leading-relaxed">
+            Symposium records used to live in chat groups and expiring drive links. Keeping proceedings, keynotes,
+            delegate rosters and souvenir magazines in one repository means future alumni, researchers and student
+            leaders can still find them decades from now.
+          </p>
         </section>
       </main>
 

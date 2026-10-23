@@ -1,12 +1,21 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { verifyAdminToken } from '@/lib/admin';
+
+let posterColumnReady = false;
+async function ensurePosterColumn() {
+  if (posterColumnReady) return;
+  await query('ALTER TABLE editions ADD COLUMN IF NOT EXISTS poster_url TEXT');
+  posterColumnReady = true;
+}
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
+    await ensurePosterColumn();
     const res = await query(
-      `SELECT year, name, theme, dates, is_active as "isActive", status, created_at as "createdAt"
+      `SELECT year, name, theme, dates, is_active as "isActive", status, poster_url as "posterUrl", created_at as "createdAt"
        FROM editions
        ORDER BY year DESC`
     );
@@ -16,11 +25,11 @@ export async function GET() {
       // Fallback inaugural if empty
       await query(
         `INSERT INTO editions (year, name, theme, dates, is_active, status)
-         VALUES (2026, 'Sumshodhini ''26', 'National Science & Technology Symposium', 'October 30–31, 2026', true, 'live')
+         VALUES (2026, 'Sumshodhini ''26', 'National Level Technical Symposium', 'October 30–31, 2026', true, 'live')
          ON CONFLICT (year) DO NOTHING`
       );
       const reload = await query(
-        `SELECT year, name, theme, dates, is_active as "isActive", status, created_at as "createdAt"
+        `SELECT year, name, theme, dates, is_active as "isActive", status, poster_url as "posterUrl", created_at as "createdAt"
          FROM editions
          ORDER BY year DESC`
       );
@@ -67,7 +76,7 @@ export async function POST(request: Request) {
          is_active = EXCLUDED.is_active,
          status = EXCLUDED.status
        RETURNING year, name, theme, dates, is_active as "isActive", status`,
-      [edYear, edName, theme || 'National Science & Technology Symposium', dates || 'October 30–31, 2026', !!setActive, setActive ? 'live' : 'upcoming']
+      [edYear, edName, theme || 'National Level Technical Symposium', dates || 'October 30–31, 2026', !!setActive, setActive ? 'live' : 'upcoming']
     );
 
     return NextResponse.json({
@@ -85,13 +94,30 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
-    const { year, dates, theme, name, setActive } = body;
+    const { year, dates, theme, name, setActive, posterUrl } = body;
 
     if (!year) {
       return NextResponse.json({ success: false, error: 'Edition year is required' }, { status: 400 });
     }
 
     const edYear = parseInt(year, 10);
+
+    // The main poster is set by the festival admin only.
+    if (posterUrl !== undefined) {
+      if (!verifyAdminToken(request.headers.get('x-admin-token'))) {
+        return NextResponse.json({ success: false, error: 'Only the festival admin can change the main poster.' }, { status: 403 });
+      }
+      await ensurePosterColumn();
+      const posterRes = await query(
+        `UPDATE editions SET poster_url = $1 WHERE year = $2
+         RETURNING year, name, theme, dates, is_active as "isActive", status, poster_url as "posterUrl"`,
+        [posterUrl || null, edYear]
+      );
+      if (posterRes.rowCount === 0) {
+        return NextResponse.json({ success: false, error: `Edition ${edYear} not found` }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, data: posterRes.rows[0], message: 'Main poster updated.' });
+    }
 
     if (setActive) {
       await query(`UPDATE editions SET is_active = false, status = 'archived' WHERE is_active = true`);

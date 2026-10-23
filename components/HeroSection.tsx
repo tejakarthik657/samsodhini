@@ -1,20 +1,12 @@
 'use client';
 
 import React from 'react';
-import { 
-  Calendar, 
-  Award, 
-  Users, 
-  BookOpen, 
-  Terminal, 
-  Search, 
-  Sparkles, 
-  Trophy, 
-  Layers,
-  Archive,
-  ChevronDown
-} from 'lucide-react';
+import { Search, ArrowUpRight } from 'lucide-react';
 import { Edition } from '../types';
+import Marquee from './ui/Marquee';
+import EmblemStage from './EmblemStage';
+import Countdown from './Countdown';
+import MainPoster from './MainPoster';
 
 interface HeroSectionProps {
   selectedBranch: string;
@@ -30,25 +22,17 @@ interface HeroSectionProps {
   onSelectYear?: (year: number) => void;
 }
 
-const BRANCH_DETAILS: Record<string, { assoc: string; label: string; accent: string }> = {
-  CE: { assoc: 'CEA', label: 'Civil Eng', accent: 'hover:border-emerald-300' },
-  ME: { assoc: 'MESA', label: 'Mechanical Eng', accent: 'hover:border-rose-300' },
-  EEE: { assoc: 'ELECTRA', label: 'Electrical Eng', accent: 'hover:border-amber-300' },
-  ECE: { assoc: 'ECLAT', label: 'Electronics & Comm', accent: 'hover:border-indigo-300' },
-  ECI: { assoc: 'ECIEA', label: 'ECI Engineering', accent: 'hover:border-violet-300' },
-  EIE: { assoc: 'EIEA', label: 'Instrumentation', accent: 'hover:border-sky-300' },
-  CSE: { assoc: 'ACE', label: 'Computer Engineering', accent: 'hover:border-blue-300' },
-  IT: { assoc: 'ITA', label: 'Information Tech', accent: 'hover:border-teal-300' },
-  CSN: { assoc: 'NETS', label: 'Networks', accent: 'hover:border-blue-300' },
-  CSM: { assoc: 'AIMS', label: 'AI & Machine Learning', accent: 'hover:border-purple-300' },
-  CSO: { assoc: 'IOTA', label: 'Internet of Things', accent: 'hover:border-cyan-300' },
-  CSD: { assoc: 'DATA', label: 'Data Science', accent: 'hover:border-emerald-300' },
-  EVL: { assoc: 'VLSI', label: 'VLSI Design', accent: 'hover:border-fuchsia-300' },
-  CSC: { assoc: 'CYBER', label: 'Cyber Security', accent: 'hover:border-red-300' },
-  ISTE: { assoc: 'ISTE', label: 'ISTE Chapter', accent: 'hover:border-blue-300' },
-  TECH: { assoc: 'TECH', label: 'Technical Club', accent: 'hover:border-purple-300' },
-  CSI: { assoc: 'CSI', label: 'CSI Branch', accent: 'hover:border-teal-300' },
-  SAC: { assoc: 'SAC', label: 'Student Activity Centre', accent: 'hover:border-amber-300' },
+const BRANCH_LIST = [
+  'CE', 'ME', 'EEE', 'ECE', 'CSE', 'IT', 'CSN', 'CSM', 'ECV', 'CSC', 'I2RE', 'MBA',
+  'ISTE', 'TECH', 'CSI', 'SAC',
+];
+
+const BRANCH_LABEL: Record<string, string> = {
+  CE: 'Civil', ME: 'Mechanical', EEE: 'Electrical (EEEA)', ECE: 'Electronics & Communication (ECEA)',
+  CSE: 'Computer Science (CSEA)', IT: 'Information Technology', CSN: 'CSE Networks and IoT (CSENA)',
+  CSM: 'CSE AI & ML and Data Science (CSMA)', ECV: 'ECE VLSI, with ECI and EIE (ECVA)', CSC: 'Cyber Security', ISTE: 'ISTE', TECH: 'Technical Club',
+  CSI: 'CSI', SAC: 'SAC',
+  I2RE: 'SAIL I2RE, Innovation, Incubation, Research & Entrepreneurship', MBA: 'MBA Association',
 };
 
 export default function HeroSection({
@@ -62,224 +46,211 @@ export default function HeroSection({
   totalEventsCount,
   selectedYear = 2026,
   editions = [],
-  onSelectYear
 }: HeroSectionProps) {
-  const branchList = [
-    'CE', 'ME', 'EEE', 'ECE', 'ECI', 'EIE', 'CSE', 'IT', 'CSN', 'CSM', 'CSO', 'CSD', 'EVL', 'CSC',
-    'ISTE', 'TECH', 'CSI', 'SAC'
-  ];
-  const currentEditionObj = editions.find(e => e.year === selectedYear);
+  const currentEditionObj = editions.find((e) => e.year === selectedYear);
   const isArchived = currentEditionObj ? !currentEditionObj.isActive : false;
+  const yy = String(selectedYear).slice(-2);
+
+  const tabs: { key: 'all' | 'workshops' | 'events'; label: string; count: number }[] = [
+    { key: 'all', label: 'Both days', count: totalWorkshopsCount + totalEventsCount },
+    { key: 'workshops', label: 'Day 1', count: totalWorkshopsCount },
+    { key: 'events', label: 'Day 2', count: totalEventsCount },
+  ];
+
 
   return (
-    <section className="relative aurora-bg bg-grid-pattern pt-28 sm:pt-36 pb-14 sm:pb-20 overflow-hidden border-b border-slate-200/80">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Top Badges & Emblem Header */}
-        <div className="text-center max-w-4xl mx-auto space-y-4">
-          {/* Institutional Affiliation Pill */}
-          <div className="inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-2xl sm:rounded-full bg-white/90 backdrop-blur-md text-slate-700 border border-slate-200/90 shadow-xs text-[11px] sm:text-xs font-bold shimmer-badge max-w-full text-center">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-            <span className="text-slate-900">KITSW Warangal</span>
-            <span className="text-slate-300 hidden sm:inline">•</span>
-            <span className="text-slate-600">ISTE Student Chapter</span>
-            <span className="text-slate-300 hidden sm:inline">•</span>
-            <span className="text-slate-600">Technical Club & SAC</span>
-          </div>
+    <>
+      {/* Hero */}
+      <section className="relative bg-cobalt-500 text-white overflow-hidden grain">
+        <div className="absolute inset-0 dots" aria-hidden="true" />
 
-          {/* Central Logo Emblem & Universal Title */}
-          <div className="flex flex-col items-center justify-center pt-1">
-            <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-3xl p-2 sm:p-2.5 bg-white border border-slate-200/90 shadow-[0_16px_36px_-12px_rgba(15,23,42,0.1)] flex items-center justify-center mb-2.5 sm:mb-3 transition-transform hover:scale-105 duration-300">
-              <img 
-                src="/Sumshodhini26icon.png" 
-                alt="Sumshodhini Official Emblem" 
-                className="w-full h-full object-contain"
-                onError={(e) => { e.currentTarget.src = '/logo.png'; }}
-              />
-            </div>
-
-            <div className="flex items-center justify-center gap-2 sm:gap-3">
-              <h1 className="text-3xl sm:text-6xl lg:text-7xl font-black text-slate-950 tracking-tight leading-none">
-                SUMSHODHINI
-              </h1>
-
-              {/* Dynamic Edition Pill */}
-              <span className="text-2xl sm:text-4xl font-black bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent">
-                &apos;{String(selectedYear).slice(-2)}
-              </span>
-            </div>
-
-            <p className="text-[10px] sm:text-sm font-mono uppercase tracking-wider sm:tracking-widest text-slate-500 font-bold mt-2">
-              National Science & Technology Symposium • 2-Day Symposium Architecture
-            </p>
-
+        <div className="relative max-w-[1500px] mx-auto px-4 sm:px-8 pt-32 sm:pt-40 pb-16 sm:pb-24">
+          {/* Stickers */}
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+            <span className="px-3.5 py-1.5 rounded-full bg-ink text-white border-2 border-ink shadow-pop-sm text-sm font-bold rotate-1">
+              Edition &apos;{yy}
+            </span>
+            <span className="px-3.5 py-1.5 rounded-full bg-white text-ink border-2 border-ink shadow-pop-sm text-sm font-bold -rotate-2">
+              KITSW Warangal
+            </span>
+            <span className="px-3.5 py-1.5 rounded-full bg-marigold-400 text-ink border-2 border-ink shadow-pop-sm text-sm font-bold rotate-2">
+              {currentEditionObj?.dates || 'Two days, 30+ events'}
+            </span>
             {isArchived && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold mt-2">
-                <Archive className="w-3.5 h-3.5" />
-                <span>Archived Edition ({selectedYear}) • Browsing Retrospective Records</span>
-              </div>
+              <span className="px-3.5 py-1.5 rounded-full bg-coral-500 text-white border-2 border-ink shadow-pop-sm text-sm font-bold -rotate-1">
+                {selectedYear} archive
+              </span>
             )}
           </div>
 
-          <p className="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed max-w-2xl mx-auto px-2">
-            The platform for student technical exploration, branch flagship masterclasses, and national challenge arenas. Archiving engineering pedagogy and innovation across Kakatiya Institute of Technology & Science.
-          </p>
+          <h1
+            className="mt-8 sm:mt-10 font-display uppercase text-marigold-400 text-[7.7vw] leading-[0.95] -ml-[0.03em] whitespace-nowrap"
+            aria-label={`Sumshodhini ${yy}`}
+          >
+            Sumshodhini
+          </h1>
 
-          {/* Real-time DB Count Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-            <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-blue-50/80 border border-blue-200/60 text-[11px] sm:text-xs text-blue-900 font-bold">
-              <BookOpen className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-              <span>{totalWorkshopsCount} Workshop{totalWorkshopsCount !== 1 ? 's' : ''}</span>
+          <div className="relative z-10 grid lg:grid-cols-12 gap-10 lg:gap-6 items-center">
+            <div className="lg:col-span-6 order-2 lg:order-1">
+              <p
+                className="font-display text-white text-[20vw] sm:text-[9vw] lg:text-[8vw] leading-[0.8] -ml-[0.03em]"
+                aria-hidden="true"
+              >
+                &apos;{yy}
+              </p>
+              <p className="mt-5 text-lg sm:text-xl text-white/95 leading-snug max-w-md">
+                The national level technical symposium of Kakatiya Institute of Technology &amp; Science. One workshop from every department on Day 1, contests with national prizes on Day 2.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <a
+                  href="#workshops"
+                  className="pop inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-marigold-400 text-ink text-base font-bold"
+                >
+                  Browse workshops <ArrowUpRight className="w-5 h-5" />
+                </a>
+                <a
+                  href="#events"
+                  className="pop inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-white text-ink text-base font-bold"
+                >
+                  Find a competition <ArrowUpRight className="w-5 h-5" />
+                </a>
+              </div>
+              <div className="mt-9">
+                <Countdown dates={currentEditionObj?.dates} />
+              </div>
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-purple-50/80 border border-purple-200/60 text-[11px] sm:text-xs text-purple-900 font-bold">
-              <Trophy className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-              <span>{totalEventsCount} Competition{totalEventsCount !== 1 ? 's' : ''}</span>
-            </div>
-          </div>
-
-          {/* 2-Day Segmented Controller */}
-          <div className="pt-2 w-full flex justify-center">
-            <div className="w-full sm:w-auto grid grid-cols-3 sm:flex p-1 sm:p-1.5 rounded-2xl sm:rounded-full bg-white border border-slate-200 shadow-[0_8px_24px_-8px_rgba(15,23,42,0.08)] gap-1">
-              <button
-                type="button"
-                onClick={() => onSelectCategory('all')}
-                className={`px-2 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-[11px] sm:text-xs font-bold transition-all text-center ${
-                  selectedCategory === 'all'
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-950 hover:bg-slate-50'
-                }`}
-              >
-                All Tracks
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onSelectCategory('workshops')}
-                className={`px-2 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1.5 text-center ${
-                  selectedCategory === 'workshops'
-                    ? 'bg-blue-900 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-950 hover:bg-slate-50'
-                }`}
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0"></span>
-                <span>Day 1</span>
-                <span className="hidden sm:inline">Workshops</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onSelectCategory('events')}
-                className={`px-2 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1.5 text-center ${
-                  selectedCategory === 'events'
-                    ? 'bg-purple-900 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-950 hover:bg-slate-50'
-                }`}
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0"></span>
-                <span>Day 2</span>
-                <span className="hidden sm:inline">Contests</span>
-              </button>
+            <div className="relative lg:col-span-6 order-1 lg:order-2 pt-14 pb-10 lg:py-0 lg:mt-[0.6vw]">
+              <EmblemStage />
             </div>
           </div>
+        </div>
 
-          {/* Dynamic Arc Description Card */}
-          <div className="max-w-xl mx-auto pt-1">
-            <div className="p-3.5 rounded-2xl bg-white/90 backdrop-blur-md border border-slate-200/90 shadow-xs text-xs font-medium text-slate-700 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5 text-left">
-                {selectedCategory === 'workshops' ? (
-                  <>
-                    <BookOpen className="w-4 h-4 text-blue-600 shrink-0" />
-                    <div>
-                      <strong className="text-slate-900 block font-bold">Day 1: Flagship Masterclasses</strong>
-                      <span className="text-[11px] text-slate-500">Exactly 1 intensive hands-on lab per branch curated by senior student conveners and faculty advisors.</span>
-                    </div>
-                  </>
-                ) : selectedCategory === 'events' ? (
-                  <>
-                    <Trophy className="w-4 h-4 text-purple-600 shrink-0" />
-                    <div>
-                      <strong className="text-slate-900 block font-bold">Day 2: National Arena Competitions</strong>
-                      <span className="text-[11px] text-slate-500">Hackathons, robotics combat, circuit debug, paper defense & project innovation expo.</span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <Layers className="w-4 h-4 text-slate-600 shrink-0" />
-                    <div>
-                      <strong className="text-slate-900 block font-bold">Complete 2-Day Experience Arc</strong>
-                      <span className="text-[11px] text-slate-500">Day 1 Masterclass exploration followed by Day 2 National competitive arena.</span>
-                    </div>
-                  </>
+        {/* Tilted ticker crossing the bottom edge */}
+        <div className="relative -mb-7 sm:-mb-9">
+          <Marquee
+            items={['Day 1 workshops', 'Day 2 competitions', 'National prizes', 'Student run']}
+            className="bg-marigold-400 text-ink border-y-2 border-ink -rotate-1 scale-[1.04] origin-left"
+          />
+        </div>
+      </section>
+
+      <MainPoster posterUrl={currentEditionObj?.posterUrl || (selectedYear === 2026 ? '/main-poster-2026.jpg' : null)} year={selectedYear} />
+
+      {/* Day doors */}
+      <section className="relative bg-paper pt-16 sm:pt-20" aria-label="Choose a day">
+        <div className="max-w-[1500px] mx-auto px-4 sm:px-8 grid md:grid-cols-2 gap-5 sm:gap-6">
+          <a
+            href="#workshops"
+            onClick={() => onSelectCategory('workshops')}
+            className="pop group relative overflow-hidden rounded-[28px] bg-lilac-200 min-h-[280px] sm:min-h-[380px] p-6 sm:p-9 flex flex-col justify-between"
+          >
+            <span className="absolute -right-2 -top-8 font-display text-[11rem] sm:text-[16rem] leading-none text-cobalt-500 transition-transform duration-300 group-hover:-translate-x-3 group-hover:rotate-[-4deg] select-none" aria-hidden="true">
+              1
+            </span>
+            <span className="relative self-start px-3 py-1 rounded-full bg-white border-2 border-ink text-sm font-bold">Day 1</span>
+            <span className="relative">
+              <span className="block font-display text-4xl sm:text-6xl leading-[0.95] text-ink">Workshops</span>
+              <span className="mt-3 flex items-center gap-3 text-base sm:text-lg font-semibold text-ink">
+                {totalWorkshopsCount} {totalWorkshopsCount === 1 ? 'workshop' : 'workshops'}, one per department
+                <ArrowUpRight className="w-6 h-6 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+              </span>
+            </span>
+          </a>
+
+          <a
+            href="#events"
+            onClick={() => onSelectCategory('events')}
+            className="pop group relative overflow-hidden rounded-[28px] bg-marigold-400 min-h-[280px] sm:min-h-[380px] p-6 sm:p-9 flex flex-col justify-between"
+          >
+            <span className="absolute -right-2 -top-8 font-display text-[11rem] sm:text-[16rem] leading-none text-ink transition-transform duration-300 group-hover:-translate-x-3 group-hover:rotate-[4deg] select-none" aria-hidden="true">
+              2
+            </span>
+            <span className="relative self-start px-3 py-1 rounded-full bg-white border-2 border-ink text-sm font-bold">Day 2</span>
+            <span className="relative">
+              <span className="block font-display text-4xl sm:text-6xl leading-[0.95] text-ink">Competitions</span>
+              <span className="mt-3 flex items-center gap-3 text-base sm:text-lg font-semibold text-ink">
+                {totalEventsCount} {totalEventsCount === 1 ? 'contest' : 'contests'}, with cash prizes
+                <ArrowUpRight className="w-6 h-6 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+              </span>
+            </span>
+          </a>
+        </div>
+      </section>
+
+      {/* Filters */}
+      <div className="bg-paper pt-14 sm:pt-20">
+        <div className="max-w-[1500px] mx-auto px-4 sm:px-8">
+          <div className="rounded-[28px] bg-white border-2 border-ink shadow-pop p-4 sm:p-5 flex flex-col gap-4">
+            <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+              <div role="tablist" aria-label="Show listings for" className="flex shrink-0 gap-1.5">
+                {tabs.map((t) => {
+                  const on = selectedCategory === t.key;
+                  return (
+                    <button
+                      key={t.key}
+                      type="button"
+                      role="tab"
+                      aria-selected={on}
+                      onClick={() => onSelectCategory(t.key)}
+                      className={`px-4 py-2 rounded-full border-2 border-ink text-sm font-bold transition-colors whitespace-nowrap ${
+                        on
+                          ? t.key === 'events' ? 'bg-marigold-400 text-ink' : 'bg-cobalt-500 text-white'
+                          : 'bg-white text-ink hover:bg-lilac-100'
+                      }`}
+                    >
+                      {t.label}
+                      <span className="ml-1.5 tabular-nums opacity-70">{t.count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="relative lg:flex-1">
+                <label htmlFor="listing-search" className="sr-only">Search listings</label>
+                <Search className="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  id="listing-search"
+                  type="text"
+                  placeholder="Search by topic, speaker or branch"
+                  value={searchQuery}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="w-full pl-12 pr-20 py-2.5 bg-paper rounded-full border-2 border-ink text-sm font-medium text-ink placeholder-slate-500 focus:outline-none focus:bg-white focus:ring-4 focus:ring-cobalt-200"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => onSearchChange('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-white bg-ink px-3 py-1.5 rounded-full"
+                  >
+                    Clear
+                  </button>
                 )}
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Search Bar & Branch Chips for all 14 Academic Branches */}
-        <div className="mt-8 max-w-4xl mx-auto space-y-4">
-          {/* Real-time Search Input */}
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Search by workshop topic, keynote speaker, hackathon name, or branch..."
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-white rounded-2xl border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 shadow-xs transition-all font-medium"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => onSearchChange('')}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full"
-              >
-                Clear
-              </button>
-            )}
-          </div>
-
-          {/* 14 Academic Department Chips */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none">
-            <button
-              type="button"
-              onClick={() => onSelectBranch('ALL')}
-              className={`shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                selectedBranch === 'ALL'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
-              }`}
-            >
-              All Departments & Clubs
-            </button>
-
-            {branchList.map((code) => {
-              const meta = BRANCH_DETAILS[code];
-              const isSelected = selectedBranch === code;
-              return (
-                <button
-                  key={code}
-                  type="button"
-                  onClick={() => onSelectBranch(code)}
-                  className={`shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                    isSelected
-                      ? 'bg-blue-900 text-white shadow-xs'
-                      : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
-                  }`}
-                  title={`${code} - ${meta?.label || code}`}
-                >
-                  <span className="font-mono">{code}</span>
-                  {meta?.assoc && (
-                    <span className={`text-[10px] font-mono px-1 rounded ${isSelected ? 'bg-blue-800 text-blue-100' : 'bg-slate-100 text-slate-500'}`}>
-                      {meta.assoc}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by branch">
+              {['ALL', ...BRANCH_LIST].map((code) => {
+                const on = selectedBranch === code;
+                return (
+                  <button
+                    key={code}
+                    type="button"
+                    onClick={() => onSelectBranch(code)}
+                    aria-pressed={on}
+                    title={code === 'ALL' ? 'All branches' : BRANCH_LABEL[code]}
+                    className={`px-3.5 py-1.5 rounded-full border-2 text-sm font-bold transition-colors ${
+                      on ? 'bg-ink text-white border-ink' : 'bg-white text-ink border-slate-300 hover:border-ink hover:bg-lilac-100'
+                    }`}
+                  >
+                    {code === 'ALL' ? 'All branches' : code}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
-    </section>
+    </>
   );
 }

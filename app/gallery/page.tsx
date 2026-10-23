@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { KITSW_BRANCHES } from '../../lib/branches';
+import PageHeader from '../../components/ui/PageHeader';
+import { KITSW_BRANCHES, canonicalBranchCode } from '../../lib/branches';
 import { GalleryItem, Edition } from '../../types';
 import { 
   Camera, 
@@ -72,7 +73,7 @@ export default function GalleryPage() {
 
   // Client-side filtering for instantaneous responsiveness
   const filteredPhotos = photos.filter((photo) => {
-    const matchesBranch = selectedBranch === 'ALL' || photo.branchCode.toUpperCase() === selectedBranch.toUpperCase();
+    const matchesBranch = selectedBranch === 'ALL' || canonicalBranchCode(photo.branchCode) === selectedBranch.toUpperCase();
     const matchesType = selectedType === 'ALL' || photo.itemType.toLowerCase() === selectedType.toLowerCase();
     const query = searchQuery.trim().toLowerCase();
     const matchesSearch =
@@ -103,37 +104,22 @@ export default function GalleryPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF9F5]">
+    <div className="min-h-screen flex flex-col bg-paper">
       <Navbar
         selectedYear={selectedYear}
         onSelectYear={setSelectedYear}
         editions={editions}
       />
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-36 pb-20 w-full space-y-8">
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-3">
-          <div className="flex items-center justify-center gap-2">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-50 text-blue-900 border border-blue-200 text-xs font-bold">
-              <Camera className="w-3.5 h-3.5 text-blue-600" />
-              <span>SYMPOSIUM VISUAL ARCHIVE • POST-EVENT DOCUMENTATION</span>
-            </div>
-            <span className="text-xs font-mono font-bold bg-white px-2.5 py-1 rounded-full border border-slate-200 text-slate-700 shadow-2xs">
-              Edition &apos;{String(selectedYear).slice(-2)}
-            </span>
-          </div>
+      <PageHeader
+        title="Gallery"
+        description="Photographs from workshops and competitions, uploaded by department conveners."
+        tone="teal"
+      />
 
-          <h1 className="text-3xl sm:text-5xl font-black text-slate-950 tracking-tight">
-            National Symposium Visual Gallery
-          </h1>
-
-          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal max-w-2xl mx-auto">
-            Official high-resolution photography archives uploaded by branch conveners across Day 1 Flagship Masterclasses and Day 2 Arena Competitions.
-          </p>
-        </div>
-
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12 pb-20 w-full space-y-8">
         {/* Multi-Dimensional Filter Control Bar */}
-        <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+        <div className="bg-white p-4 rounded-[24px] border-2 border-ink shadow-pop space-y-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative w-full md:w-80">
@@ -143,7 +129,7 @@ export default function GalleryPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search activity, department or caption..."
-                className="w-full pl-10 pr-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none font-medium text-slate-900 focus:bg-white focus:border-slate-400 transition-colors"
+                className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-paper border-2 border-ink rounded-full outline-none font-medium text-ink focus:bg-white focus:ring-4 focus:ring-cobalt-200 transition-colors"
               />
             </div>
 
@@ -152,10 +138,10 @@ export default function GalleryPage() {
               <button
                 type="button"
                 onClick={() => setSelectedType('ALL')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+                className={`px-3.5 py-1.5 rounded-full border-2 text-sm font-bold transition-all shrink-0 ${
                   selectedType === 'ALL'
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    ? 'bg-ink text-white border-ink '
+                    : 'bg-white text-ink border-slate-300 hover:border-ink hover:bg-lilac-100'
                 }`}
               >
                 All Activities ({photos.length})
@@ -164,9 +150,9 @@ export default function GalleryPage() {
               <button
                 type="button"
                 onClick={() => setSelectedType('workshop')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+                className={`px-3.5 py-1.5 rounded-full border-2 text-sm font-bold transition-all flex items-center gap-1.5 shrink-0 ${
                   selectedType === 'workshop'
-                    ? 'bg-blue-600 text-white shadow-xs'
+                    ? 'bg-blue-600 text-white '
                     : 'bg-blue-50 text-blue-800 hover:bg-blue-100'
                 }`}
               >
@@ -177,9 +163,9 @@ export default function GalleryPage() {
               <button
                 type="button"
                 onClick={() => setSelectedType('event')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+                className={`px-3.5 py-1.5 rounded-full border-2 text-sm font-bold transition-all flex items-center gap-1.5 shrink-0 ${
                   selectedType === 'event'
-                    ? 'bg-purple-600 text-white shadow-xs'
+                    ? 'bg-purple-600 text-white '
                     : 'bg-purple-50 text-purple-800 hover:bg-purple-100'
                 }`}
               >
@@ -191,16 +177,16 @@ export default function GalleryPage() {
 
           {/* Department & Club Selector Chips */}
           <div className="pt-3 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
-            <span className="text-[11px] font-bold text-slate-400 mr-1 flex items-center gap-1 shrink-0">
+            <span className="text-xs font-bold text-slate-400 mr-1 flex items-center gap-1 shrink-0">
               <Filter className="w-3 h-3" /> Department:
             </span>
             <button
               type="button"
               onClick={() => setSelectedBranch('ALL')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shrink-0 ${
+              className={`px-3.5 py-1.5 rounded-full border-2 text-sm font-bold transition-colors shrink-0 ${
                 selectedBranch === 'ALL'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-ink text-white border-ink '
+                  : 'bg-white text-ink border-slate-300 hover:border-ink hover:bg-lilac-100'
               }`}
             >
               All Departments & Clubs
@@ -211,10 +197,10 @@ export default function GalleryPage() {
                 type="button"
                 onClick={() => setSelectedBranch(b.code)}
                 title={b.name}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors shrink-0 ${
+                className={`px-3.5 py-1.5 rounded-full border-2 text-sm font-bold whitespace-nowrap transition-colors shrink-0 ${
                   selectedBranch === b.code
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    ? 'bg-ink text-white border-ink '
+                    : 'bg-white text-ink border-slate-300 hover:border-ink hover:bg-lilac-100'
                 }`}
               >
                 {b.code}
@@ -227,7 +213,7 @@ export default function GalleryPage() {
         <div className="flex items-center justify-between text-xs text-slate-500 font-semibold px-1">
           <span>
             Showing <strong>{filteredPhotos.length}</strong> photo{filteredPhotos.length === 1 ? '' : 's'}
-            {selectedBranch !== 'ALL' && ` for ${selectedBranch}`}
+            {selectedBranch !== 'ALL' && ` yet`}
             {selectedType !== 'ALL' && ` in ${selectedType === 'workshop' ? 'Day 1 Workshops' : 'Day 2 Competitions'}`}
           </span>
           <Link
@@ -243,16 +229,16 @@ export default function GalleryPage() {
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="aspect-[4/3] rounded-2xl bg-slate-200 animate-pulse" />
+              <div key={i} className="aspect-[4/3] rounded-[20px] border-2 border-ink bg-lilac-100 animate-pulse" />
             ))}
           </div>
         ) : filteredPhotos.length === 0 ? (
-          <div className="py-16 text-center bg-white rounded-3xl border border-slate-200 max-w-lg mx-auto p-8 space-y-3 shadow-xs">
+          <div className="py-16 text-center bg-white rounded-[28px] border-2 border-dashed border-ink max-w-lg mx-auto p-8 space-y-3 ">
             <ImageIcon className="w-12 h-12 text-slate-300 mx-auto" />
             <h4 className="text-base font-bold text-slate-900">
               {searchQuery
                 ? `No photos found matching "${searchQuery}".`
-                : `No activity photographs uploaded yet for ${selectedBranch} in Edition ${selectedYear}.`}
+                : `No activity photographs uploaded yet yet.`}
             </h4>
             <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
               Student associations can upload up to 12 high-resolution photos per workshop and competition round through the Organizer Command Portal.
@@ -266,14 +252,14 @@ export default function GalleryPage() {
                     setSelectedBranch('ALL');
                     setSelectedType('ALL');
                   }}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-colors"
+                  className="px-4 py-2 rounded-full border-2 border-ink bg-white hover:bg-lilac-100 text-ink text-sm font-bold transition-colors"
                 >
                   Clear Filters
                 </button>
               )}
               <Link
                 href="/organizer"
-                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition-colors"
+                className="pop px-4 py-2 rounded-full bg-ink text-white text-sm font-bold"
               >
                 Open Organizer Portal
               </Link>
@@ -287,7 +273,7 @@ export default function GalleryPage() {
                 <div
                   key={photo.id}
                   onClick={() => setActiveLightboxIndex(index)}
-                  className="group cursor-pointer rounded-2xl overflow-hidden bg-white border border-slate-200/90 hover:border-slate-400 shadow-2xs hover:shadow-md transition-all duration-300 flex flex-col"
+                  className="pop group cursor-pointer rounded-[20px] overflow-hidden bg-white flex flex-col"
                 >
                   <div className="relative aspect-[4/3] overflow-hidden bg-slate-950">
                     <img
@@ -301,19 +287,19 @@ export default function GalleryPage() {
                     {/* Top Badges */}
                     <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
                       <span
-                        className="px-2 py-0.5 rounded-md text-[10px] font-black shadow-xs text-white"
+                        className="px-2 py-0.5 rounded-md text-xs font-bold  text-white"
                         style={{ backgroundColor: branchMeta?.accentColor || '#0F172A' }}
                       >
                         {photo.branchCode}
                       </span>
-                      <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-white/90 backdrop-blur-xs text-slate-800 shadow-2xs">
+                      <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-white/90 backdrop-blur-xs text-slate-800 ">
                         {photo.itemType === 'workshop' ? 'Day 1 Workshop' : 'Day 2 Contest'}
                       </span>
                     </div>
 
                     {/* Bottom Caption on Hover */}
                     <div className="absolute bottom-2.5 inset-x-2.5 text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="text-[11px] font-bold line-clamp-1">
+                      <span className="text-xs font-bold line-clamp-1">
                         {photo.itemTitle}
                       </span>
                     </div>
@@ -324,11 +310,11 @@ export default function GalleryPage() {
                       {photo.itemTitle}
                     </h4>
                     {photo.caption && (
-                      <p className="text-[11px] text-slate-500 line-clamp-1">
+                      <p className="text-xs text-slate-500 line-clamp-1">
                         {photo.caption}
                       </p>
                     )}
-                    <span className="text-[10px] font-mono text-slate-400 block pt-0.5">
+                    <span className="text-xs font-mono text-slate-400 block pt-0.5">
                       Edition &apos;{String(photo.editionYear).slice(-2)} • {new Date(photo.createdAt).toLocaleDateString()}
                     </span>
                   </div>
@@ -346,27 +332,27 @@ export default function GalleryPage() {
           onClick={() => setActiveLightboxIndex(null)}
         >
           <div 
-            className="relative max-w-5xl w-full max-h-[92vh] flex flex-col bg-slate-950 rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-800 shadow-2xl"
+            className="relative max-w-5xl w-full max-h-[92vh] flex flex-col bg-ink rounded-[26px] overflow-hidden border-2 border-white/80 shadow-pop-lg"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Lightbox Topbar */}
             <div className="flex items-center justify-between p-3 sm:p-4 border-b border-slate-800/80 bg-slate-950/70 text-white">
               <div className="flex items-center gap-2 min-w-0 pr-2">
-                <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-black bg-blue-600 text-white shrink-0">
+                <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md text-xs sm:text-xs font-bold bg-blue-600 text-white shrink-0">
                   {activePhoto.branchCode}
                 </span>
                 <div className="flex flex-col min-w-0">
-                  <h3 className="text-xs sm:text-sm font-bold text-slate-100 truncate max-w-xs sm:max-w-xl">
+                  <h3 className="font-display text-xs sm:text-sm  text-slate-100 truncate max-w-xs sm:max-w-xl">
                     {activePhoto.itemTitle}
                   </h3>
-                  <span className="text-[9px] sm:text-[10px] text-slate-400 truncate">
+                  <span className="text-xs sm:text-xs text-slate-400 truncate">
                     {activePhoto.itemType === 'workshop' ? 'Day 1 Workshop' : 'Day 2 Contest'} • Edition {activePhoto.editionYear}
                   </span>
                 </div>
               </div>
 
               <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                <span className="text-[11px] sm:text-xs font-mono font-bold text-slate-400">
+                <span className="text-xs sm:text-xs font-mono font-bold text-slate-400">
                   {activeLightboxIndex! + 1} / {filteredPhotos.length}
                 </span>
                 <button
@@ -409,7 +395,7 @@ export default function GalleryPage() {
 
             {/* Lightbox Caption Footer */}
             {activePhoto.caption && (
-              <div className="p-4 bg-slate-900 border-t border-slate-800 text-slate-200 text-xs">
+              <div className="p-4 bg-teal-900 border-t border-slate-800 text-slate-200 text-xs">
                 <p className="font-medium leading-relaxed">{activePhoto.caption}</p>
               </div>
             )}

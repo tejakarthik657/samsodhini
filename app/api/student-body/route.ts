@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { BRANCH_ALIASES, BRANCH_LOOKUP, KITSW_BRANCHES } from '@/lib/branches';
 
 export const dynamic = 'force-dynamic';
+
+// Cyber Security and the Student Activity Centre are not listed under Student Bodies.
+const HIDDEN_STUDENT_BODIES = new Set(['CSC', 'SAC']);
 
 export async function GET(req: NextRequest) {
   try {
@@ -27,7 +31,7 @@ export async function GET(req: NextRequest) {
         $1::int as "editionYear"
       FROM branches b
       LEFT JOIN student_body_posters sb 
-        ON UPPER(b.code) = UPPER(sb.branch_code) AND sb.edition_year = $1
+        ON (UPPER(b.code) = UPPER(sb.branch_code) OR (UPPER(b.code) = 'EVL' AND UPPER(sb.branch_code) = 'ECV')) AND sb.edition_year = $1
     `;
     const params: any[] = [parseInt(year, 10)];
 
@@ -40,9 +44,57 @@ export async function GET(req: NextRequest) {
 
     const res = await query(sql, params);
 
+    // ECI, EIE, CSD and CSO share their parent's association, so they get no card of their own.
+    const rows = res.rows
+      .filter((r: any, _i: number, all: any[]) => {
+        const c = String(r.branchCode).toUpperCase();
+        const parent = BRANCH_ALIASES[c];
+        // Keep one alias row (EVL) as the parent's card when the parent has no row of its own.
+        return !parent || (c === 'EVL' && !all.some((x: any) => String(x.branchCode).toUpperCase() === parent));
+      })
+      .map((r: any) => {
+        const code = BRANCH_ALIASES[String(r.branchCode).toUpperCase()] || String(r.branchCode).toUpperCase();
+        const info = BRANCH_LOOKUP[code];
+        return info
+          ? { ...r, branchCode: code, branchName: info.name, associationName: info.associationName, associationShort: info.associationShort }
+          : r;
+      });
+
+    // Associations added after the branches table was seeded (I2RE, MBA) have no row there yet.
+    if (!branch || branch === 'ALL') {
+      const have = new Set(rows.map((r: any) => String(r.branchCode).toUpperCase()));
+      for (const b of KITSW_BRANCHES) {
+        if (have.has(b.code) || HIDDEN_STUDENT_BODIES.has(b.code)) continue;
+        const sb = await query(
+          `SELECT id, poster_url as "posterUrl", title, description, faculty_advisor as "facultyAdvisor", student_president as "studentPresident"
+           FROM student_body_posters WHERE UPPER(branch_code) = $1 AND edition_year = $2`,
+          [b.code, parseInt(year, 10)]
+        );
+        const r = sb.rows[0] || {};
+        rows.push({
+          branchCode: b.code,
+          branchName: b.name,
+          associationName: b.associationName,
+          associationShort: b.associationShort,
+          accentColor: b.accentColor,
+          bgLightColor: b.bgLightColor,
+          logoUrl: null,
+          posterUrl: r.posterUrl || null,
+          title: r.title || `${b.name} Student Executive Body`,
+          description: r.description || null,
+          facultyAdvisor: r.facultyAdvisor || null,
+          studentPresident: r.studentPresident || null,
+          id: r.id || null,
+          editionYear: parseInt(year, 10),
+        });
+      }
+    }
+
+    const visible = rows.filter((r: any) => !HIDDEN_STUDENT_BODIES.has(String(r.branchCode).toUpperCase()));
+
     return NextResponse.json({
       success: true,
-      data: res.rows,
+      data: visible,
       editionYear: parseInt(year, 10),
     });
   } catch (error: any) {
@@ -60,16 +112,16 @@ export async function POST(req: NextRequest) {
     const {
       editionYear = 2026,
       branchCode,
-      posterUrl,
+      posterUrl = '',
       title,
       description = '',
       facultyAdvisor = '',
       studentPresident = '',
     } = body;
 
-    if (!branchCode || !posterUrl) {
+    if (!branchCode) {
       return NextResponse.json(
-        { success: false, error: 'Branch code and poster URL are required' },
+        { success: false, error: 'Branch code is required' },
         { status: 400 }
       );
     }
@@ -122,5 +174,30 @@ export async function POST(req: NextRequest) {
       { success: false, error: 'Failed to archive student body poster' },
       { status: 500 }
     );
+  }
+}
+
+// Removes only the uploaded poster; the title, advisor, president and description stay.
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const branch = (searchParams.get('branch') || '').toUpperCase();
+    const year = parseInt(searchParams.get('year') || '2026', 10);
+
+    if (!branch) {
+      return NextResponse.json({ success: false, error: 'Branch code is required' }, { status: 400 });
+    }
+
+    await query(
+      `UPDATE student_body_posters SET poster_url = '', updated_at = CURRENT_TIMESTAMP
+       WHERE UPPER(branch_code) = $1 AND edition_year = $2`,
+      [branch, year]
+    );
+    await query(`UPDATE branches SET student_body_poster_url = '' WHERE UPPER(code) = $1`, [branch]);
+
+    return NextResponse.json({ success: true, message: `${branch} student body poster removed` });
+  } catch (error: any) {
+    console.error('Error removing student body poster:', error);
+    return NextResponse.json({ success: false, error: 'Failed to remove student body poster' }, { status: 500 });
   }
 }
